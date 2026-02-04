@@ -106,12 +106,7 @@ app = FastAPI(
     openapi_url="/openapi.json" if settings.is_development else None
 )
 
-# Rate limiting middleware
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-app.add_middleware(SlowAPIMiddleware)
-
-# CORS middleware - more permissive configuration
+# CORS middleware - MUST be FIRST to handle preflight
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
@@ -121,6 +116,12 @@ app.add_middleware(
     expose_headers=["*"],
     max_age=3600,  # Cache preflight requests for 1 hour
 )
+
+# Rate limiting middleware - AFTER CORS
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+# Don't add SlowAPIMiddleware - it breaks CORS preflight
+# app.add_middleware(SlowAPIMiddleware)
 
 # Root endpoint
 @app.get("/", tags=["Root"])
