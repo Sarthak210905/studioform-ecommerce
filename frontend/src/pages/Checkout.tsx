@@ -158,13 +158,13 @@ export default function Checkout() {
         console.log('Shipping result:', result);
         setShippingCost(result.shipping_cost);
       } else {
-        // Default fallback - set immediately
+        // Default fallback - set immediately (check subtotal for free shipping)
         console.log('Using fallback shipping calculation');
         setShippingCost(total >= 1499 ? 0 : 150);
       }
     } catch (error) {
       console.error('Failed to calculate shipping:', error);
-      // Fallback to simple calculation
+      // Fallback to simple calculation (check subtotal for free shipping)
       setShippingCost(total >= 1499 ? 0 : 150);
     }
   };
@@ -290,13 +290,15 @@ export default function Checkout() {
     }
   };
 
-  const handleRazorpaySuccess = async (_paymentId: string) => {
+  const handleRazorpaySuccess = async (paymentId: string) => {
+    console.log('Payment successful:', paymentId);
     clearCart();
     toast({
       title: 'Order Placed Successfully!',
       description: `Order #${orderNumber}`,
     });
-    navigate(`/order-success/${pendingOrderId}`);
+    // Navigate immediately to success page
+    window.location.href = `/order-success/${pendingOrderId}`;
   };
 
   const handleRazorpayFailure = (reason: string) => {
