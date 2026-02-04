@@ -33,8 +33,8 @@ class Settings(BaseSettings):
     CLOUDINARY_API_SECRET: str
     
     # Razorpay
-    RAZORPAY_KEY_ID: str
-    RAZORPAY_KEY_SECRET: str
+    RAZORPAY_KEY_ID: Optional[str] = None
+    RAZORPAY_KEY_SECRET: Optional[str] = None
     RAZORPAY_WEBHOOK_SECRET: Optional[str] = None
     
     # Delhivery
