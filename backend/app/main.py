@@ -67,8 +67,16 @@ except ImportError:
     admin = None
     print("⚠️ Warning: admin routes not found")
 
-# Initialize rate limiter
-limiter = Limiter(key_func=get_remote_address, default_limits=["100/minute"])
+# Initialize rate limiter with OPTIONS exclusion
+def should_skip_rate_limit(request: Request) -> bool:
+    """Skip rate limiting for OPTIONS requests (CORS preflight)"""
+    return request.method == "OPTIONS"
+
+limiter = Limiter(
+    key_func=get_remote_address, 
+    default_limits=["100/minute"],
+    skip_func=should_skip_rate_limit
+)
 
 # Lifespan context manager
 @asynccontextmanager
