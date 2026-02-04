@@ -27,9 +27,9 @@ from app.api.routes import contact
 # Optional routes
 try:
     from app.api.routes import payment
-except ImportError:
+except ImportError as e:
     payment = None
-    print("⚠️ Warning: payment routes not found")
+    print(f"⚠️ Warning: payment routes not found - {e}")
 
 try:
     from app.api.routes import analytics
