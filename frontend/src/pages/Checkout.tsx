@@ -207,6 +207,16 @@ export default function Checkout() {
   };
 
   const handlePlaceOrder = async () => {
+    // Validate shipping cost is calculated
+    if (shippingCost === null) {
+      toast({
+        title: 'Please Wait',
+        description: 'Calculating shipping costs...',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     // Validate address
     let shippingAddress: any;
     let phone = '';
@@ -292,13 +302,27 @@ export default function Checkout() {
 
   const handleRazorpaySuccess = async (paymentId: string) => {
     console.log('Payment successful:', paymentId);
+    
+    try {
+      // Clear backend cart first
+      await api.delete('/cart/');
+    } catch (error) {
+      console.error('Failed to clear backend cart:', error);
+    }
+    
+    // Clear frontend cart
     clearCart();
+    
+    // Show success message
     toast({
       title: 'Order Placed Successfully!',
       description: `Order #${orderNumber}`,
     });
-    // Navigate immediately to success page
-    window.location.href = `/order-success/${pendingOrderId}`;
+    
+    // Small delay to ensure state is persisted, then redirect
+    setTimeout(() => {
+      window.location.href = `/order-success/${pendingOrderId}`;
+    }, 100);
   };
 
   const handleRazorpayFailure = (reason: string) => {

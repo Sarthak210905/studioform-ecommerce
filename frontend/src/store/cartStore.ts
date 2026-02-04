@@ -110,6 +110,8 @@ export const useCartStore = create<CartState>()(
             total_items: 0,
           }
         });
+        // Also clear backend cart
+        api.delete('/cart/').catch(err => console.error('Failed to clear backend cart:', err));
       },
       calculateTotal: () => {
         const items = get().items;
