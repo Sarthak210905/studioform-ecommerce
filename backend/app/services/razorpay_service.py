@@ -4,11 +4,15 @@ import hashlib
 from app.core.config import settings
 
 # Initialize Razorpay client with error handling
-try:
-    razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-except Exception as e:
-    print(f"⚠️ Failed to initialize Razorpay client: {e}")
-    razorpay_client = None
+razorpay_client = None
+if settings.RAZORPAY_KEY_ID and settings.RAZORPAY_KEY_SECRET:
+    try:
+        razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+        print("✅ Razorpay client initialized successfully")
+    except Exception as e:
+        print(f"⚠️ Failed to initialize Razorpay client: {e}")
+else:
+    print("⚠️ Razorpay credentials not configured")
 
 def create_razorpay_order(amount: float, order_id: str, customer_email: str, customer_phone: str) -> dict:
     """
