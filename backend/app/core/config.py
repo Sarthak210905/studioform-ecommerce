@@ -60,8 +60,9 @@ class Settings(BaseSettings):
     # Frontend URL
     FRONTEND_URL: str = "http://localhost:3000"
     
-    # CORS Origins
+    # CORS Origins - Support both variable names
     CORS_ORIGINS: str = "http://localhost:3000,http://localhost:3001"
+    ALLOWED_ORIGINS: Optional[str] = None  # Alternative variable name
     
     # Social Auth
     GOOGLE_CLIENT_ID: Optional[str] = None
@@ -78,8 +79,9 @@ class Settings(BaseSettings):
     
     @property
     def cors_origins_list(self) -> List[str]:
-        """Convert CORS_ORIGINS string to list"""
-        return [origin.strip() for origin in self.CORS_ORIGINS.split(",")]
+        """Convert CORS_ORIGINS or ALLOWED_ORIGINS string to list"""
+        origins = self.ALLOWED_ORIGINS if self.ALLOWED_ORIGINS else self.CORS_ORIGINS
+        return [origin.strip() for origin in origins.split(",")]
     
     @property
     def is_production(self) -> bool:
