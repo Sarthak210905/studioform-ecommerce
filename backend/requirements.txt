@@ -11,6 +11,7 @@ pydantic-settings==2.6.1
 python-dotenv==1.0.1
 redis==5.2.0
 slowapi==0.1.9
+setuptools>=65.0.0
 razorpay==1.4.2
 requests==2.32.3
 cloudinary==1.41.0
