@@ -68,14 +68,15 @@ except ImportError:
     print("⚠️ Warning: admin routes not found")
 
 # Initialize rate limiter with OPTIONS exclusion
-def should_skip_rate_limit(request: Request) -> bool:
-    """Skip rate limiting for OPTIONS requests (CORS preflight)"""
-    return request.method == "OPTIONS"
+def get_remote_address_skip_options(request: Request):
+    """Get remote address for rate limiting, but skip OPTIONS requests"""
+    if request.method == "OPTIONS":
+        return None  # Skip rate limiting for OPTIONS
+    return get_remote_address(request)
 
 limiter = Limiter(
-    key_func=get_remote_address, 
-    default_limits=["100/minute"],
-    skip_func=should_skip_rate_limit
+    key_func=get_remote_address_skip_options, 
+    default_limits=["100/minute"]
 )
 
 # Lifespan context manager
