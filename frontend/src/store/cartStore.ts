@@ -33,6 +33,7 @@ interface CartState {
   calculateTotal: () => void;
   fetchCart: () => Promise<void>;
   syncCartToBackend: () => Promise<void>;
+  loadAndMergeCart: () => Promise<void>; // Added for login sync
 }
 
 export const useCartStore = create<CartState>()(
@@ -135,11 +136,31 @@ export const useCartStore = create<CartState>()(
       fetchCart: async () => {
         set({ loading: true });
         try {
-          // This would typically fetch cart from API
-          // For now, just recalculate from existing items
-          get().calculateTotal();
+          // Fetch cart from backend API
+          const response = await api.get('/cart/');
+          const backendCart = response.data;
+          
+          if (backendCart && backendCart.items) {
+            // Map backend cart items to frontend format
+            const items = backendCart.items.map((item: any) => ({
+              id: item.id || item.product_id,
+              product_id: item.product_id,
+              product_name: item.product_name,
+              product_price: item.product_price,
+              quantity: item.quantity,
+              image_url: item.image_url,
+              stock_quantity: item.stock_quantity || 999,
+              subtotal: item.subtotal || (item.quantity * item.product_price),
+            }));
+            
+            // Update store with backend cart
+            set({ items });
+            get().calculateTotal();
+          }
         } catch (error) {
           console.error('Failed to fetch cart:', error);
+          // If fetch fails, keep local cart and try to sync it
+          get().calculateTotal();
         } finally {
           set({ loading: false });
         }
@@ -160,6 +181,57 @@ export const useCartStore = create<CartState>()(
         } catch (error) {
           console.error('Failed to sync cart to backend:', error);
           throw error;
+        }
+      },
+      loadAndMergeCart: async () => {
+        set({ loading: true });
+        try {
+          const localItems = get().items;
+          
+          // Fetch backend cart
+          const response = await api.get('/cart/');
+          const backendCart = response.data;
+          
+          if (backendCart && backendCart.items && backendCart.items.length > 0) {
+            // Backend has items, merge with local
+            const backendItems = backendCart.items.map((item: any) => ({
+              id: item.id || item.product_id,
+              product_id: item.product_id,
+              product_name: item.product_name,
+              product_price: item.product_price,
+              quantity: item.quantity,
+              image_url: item.image_url,
+              stock_quantity: item.stock_quantity || 999,
+              subtotal: item.subtotal || (item.quantity * item.product_price),
+            }));
+            
+            // Merge: prefer backend quantities, add local-only items
+            const mergedMap = new Map();
+            backendItems.forEach((item: any) => mergedMap.set(item.product_id, item));
+            
+            localItems.forEach((item) => {
+              if (!mergedMap.has(item.product_id)) {
+                mergedMap.set(item.product_id, item);
+              }
+            });
+            
+            const mergedItems = Array.from(mergedMap.values());
+            set({ items: mergedItems });
+            get().calculateTotal();
+            
+            // Sync merged cart back to backend
+            if (localItems.length > 0) {
+              await get().syncCartToBackend();
+            }
+          } else if (localItems.length > 0) {
+            // No backend cart, sync local to backend
+            await get().syncCartToBackend();
+          }
+        } catch (error) {
+          console.error('Failed to merge cart:', error);
+          get().calculateTotal();
+        } finally {
+          set({ loading: false });
         }
       },
     }),

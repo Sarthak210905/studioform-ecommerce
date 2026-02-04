@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuthStore } from '@/store/authStore';
+import { useCartStore } from '@/store/cartStore';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/axios';
 import { Loader2, User, Lock, Eye, EyeOff } from 'lucide-react';
@@ -14,6 +15,7 @@ export default function Login() {
   const location = useLocation();
   const { toast } = useToast();
   const login = useAuthStore((state) => state.login);
+  const { loadAndMergeCart } = useCartStore();
 
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -46,6 +48,9 @@ export default function Login() {
 
       // Store user and token in the store
       login(response.data.user, response.data.access_token);
+      
+      // Load and merge cart from backend
+      await loadAndMergeCart();
       
       toast({
         title: 'Welcome back!',
