@@ -12,7 +12,7 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Create axios instance WITHOUT /api prefix
 export const api = axios.create({
-  baseURL: 'http://localhost:8000', // Changed from 'http://localhost:8000/api'
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
   headers: {
     'Content-Type': 'application/json',
   },
