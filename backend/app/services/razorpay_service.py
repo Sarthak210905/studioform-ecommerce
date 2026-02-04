@@ -3,14 +3,24 @@ import hmac
 import hashlib
 from app.core.config import settings
 
-# Initialize Razorpay client
-razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+# Initialize Razorpay client with error handling
+try:
+    razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+except Exception as e:
+    print(f"⚠️ Failed to initialize Razorpay client: {e}")
+    razorpay_client = None
 
 def create_razorpay_order(amount: float, order_id: str, customer_email: str, customer_phone: str) -> dict:
     """
     Create Razorpay order
     Amount should be in rupees (will be converted to paise)
     """
+    
+    if razorpay_client is None:
+        return {
+            "success": False,
+            "error": "Payment gateway not configured. Please contact support."
+        }
     
     amount_in_paise = int(amount * 100)  # Convert rupees to paise
     
@@ -80,6 +90,12 @@ def fetch_payment_details(payment_id: str) -> dict:
     Fetch payment details from Razorpay
     """
     
+    if razorpay_client is None:
+        return {
+            "success": False,
+            "error": "Payment gateway not configured"
+        }
+    
     try:
         payment = razorpay_client.payment.fetch(payment_id)
         return {
@@ -97,6 +113,12 @@ def create_refund(payment_id: str, amount: float = None) -> dict:
     Create refund for a payment
     If amount is None, full refund is initiated
     """
+    
+    if razorpay_client is None:
+        return {
+            "success": False,
+            "error": "Payment gateway not configured"
+        }
     
     try:
         refund_data = {}
