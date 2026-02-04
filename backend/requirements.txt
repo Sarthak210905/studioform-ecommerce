@@ -9,3 +9,9 @@ pydantic[email]==2.10.3
 pydantic-settings==2.6.1
 python-dotenv==1.0.1
 redis==5.2.0
+slowapi==0.1.9
+razorpay==1.4.2
+requests==2.32.3
+cloudinary==1.41.0
+aiosmtplib==3.0.2
+reportlab==4.2.5
