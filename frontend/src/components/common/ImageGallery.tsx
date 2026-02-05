@@ -55,6 +55,11 @@ export default function ImageGallery({ images, productName, discount, isOutOfSto
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
+    // Safety check to prevent NaN
+    if (!rect.width || !rect.height || rect.width === 0 || rect.height === 0) {
+      return;
+    }
+
     const xPercent = (x / rect.width) * 100;
     const yPercent = (y / rect.height) * 100;
 
