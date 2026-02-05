@@ -149,6 +149,26 @@ async def verify_payment(
     order.updated_at = datetime.utcnow()
     await order.save()
     
+    # Update product stock
+    for order_item in order.items:
+        try:
+            product = await Product.get(PydanticObjectId(order_item.product_id))
+            if product:
+                product.stock -= order_item.quantity
+                await product.save()
+        except Exception as e:
+            print(f"Error updating stock for product {order_item.product_id}: {e}")
+    
+    # Clear user's cart
+    try:
+        cart_items = await CartItem.find(
+            CartItem.user_id == str(current_user.id)
+        ).to_list()
+        for cart_item in cart_items:
+            await cart_item.delete()
+    except Exception as e:
+        print(f"Error clearing cart: {e}")
+    
     # Send payment confirmation email
     await send_payment_confirmation_email(current_user.email, order)
     

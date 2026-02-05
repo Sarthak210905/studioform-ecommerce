@@ -303,14 +303,7 @@ export default function Checkout() {
   const handleRazorpaySuccess = async (paymentId: string) => {
     console.log('Payment successful:', paymentId);
     
-    try {
-      // Clear backend cart first
-      await api.delete('/cart/');
-    } catch (error) {
-      console.error('Failed to clear backend cart:', error);
-    }
-    
-    // Clear frontend cart
+    // Clear frontend cart immediately (backend cart already cleared after payment verification)
     clearCart();
     
     // Show success message
@@ -319,10 +312,8 @@ export default function Checkout() {
       description: `Order #${orderNumber}`,
     });
     
-    // Small delay to ensure state is persisted, then redirect
-    setTimeout(() => {
-      window.location.href = `/order-success/${pendingOrderId}`;
-    }, 100);
+    // Navigate to success page
+    navigate(`/order-success/${pendingOrderId}`, { replace: true });
   };
 
   const handleRazorpayFailure = (reason: string) => {

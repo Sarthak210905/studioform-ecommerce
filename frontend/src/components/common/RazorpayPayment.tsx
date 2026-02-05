@@ -91,13 +91,15 @@ export default function RazorpayPayment({
             });
 
             if (verifyResponse.data.success) {
+              // Payment verified successfully - call success handler
               onSuccess(response.razorpay_payment_id);
-              toast({
-                title: 'Payment Successful!',
-                description: 'Your order has been confirmed.',
-              });
             } else {
               onFailure('Payment verification failed');
+              toast({
+                title: 'Payment Verification Failed',
+                description: 'Payment verification failed. Please contact support.',
+                variant: 'destructive',
+              });
             }
           } catch (error: any) {
             console.error('Payment verification error:', error);
