@@ -17,3 +17,4 @@ requests==2.32.3
 cloudinary==1.41.0
 aiosmtplib==3.0.2
 reportlab==4.2.5
+aiofiles==24.1.0

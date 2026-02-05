@@ -1,11 +1,14 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
+import os
+from pathlib import Path
 
 from app.core.config import settings
 from app.db.mongodb import init_db, close_db
@@ -137,7 +140,14 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 @app.get("/", tags=["Root"])
 @limiter.limit("200/minute")
 async def root(request: Request):
-    """API root endpoint"""
+    """API root endpoint - serve frontend in production, API info in development"""
+    # In production, serve the frontend index.html
+    if not settings.is_development:
+        index_file = Path(__file__).parent.parent / "static" / "index.html"
+        if index_file.exists():
+            return FileResponse(str(index_file))
+    
+    # In development, show API info
     return {
         "message": f"Welcome to {settings.PROJECT_NAME}",
         "version": settings.VERSION,
@@ -235,16 +245,35 @@ if tracking:
 if admin:
     app.include_router(admin.router, prefix="/admin", tags=["Admin"])
 
+# Mount static files for frontend (production)
+static_dir = Path(__file__).parent.parent / "static"
+if static_dir.exists():
+    app.mount("/assets", StaticFiles(directory=str(static_dir / "assets")), name="assets")
+    print(f"✅ Serving frontend static files from {static_dir}")
+
 # FIXED: Exception handlers using JSONResponse
 @app.exception_handler(404)
 async def not_found_handler(request: Request, exc):
-    """Custom 404 handler"""
+    """Custom 404 handler for API routes, serve index.html for frontend routes"""
+    # If request path starts with /api, return JSON error
+    if request.url.path.startswith("/api") or request.url.path.startswith("/auth") or request.url.path.startswith("/products"):
+        return JSONResponse(
+            status_code=404,
+            content={
+                "error": "Not Found",
+                "message": f"The endpoint {request.url.path} does not exist",
+                "docs": "/docs" if settings.is_development else None
+            }
+        )
+    # Otherwise, serve index.html for frontend routing
+    index_file = static_dir / "index.html"
+    if index_file.exists():
+        return FileResponse(str(index_file))
     return JSONResponse(
         status_code=404,
         content={
             "error": "Not Found",
-            "message": f"The endpoint {request.url.path} does not exist",
-            "docs": "/docs" if settings.is_development else None
+            "message": f"The endpoint {request.url.path} does not exist"
         }
     )
 
