@@ -73,6 +73,10 @@ export default function RazorpayPayment({
 
       const { razorpay_order_id } = response.data;
 
+      if (!razorpay_order_id) {
+        throw new Error('Failed to create Razorpay order');
+      }
+
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_Rx1amIQ75nnrH6',
         amount: Math.round(amount * 100),
@@ -134,10 +138,22 @@ export default function RazorpayPayment({
       razorpay.open();
     } catch (error: any) {
       console.error('Payment error:', error);
-      onFailure(error.response?.data?.detail || 'Failed to initialize payment');
+      
+      // Provide specific error messages
+      let errorMessage = 'Failed to initialize payment gateway';
+      
+      if (error.response?.status === 500) {
+        errorMessage = 'Payment service temporarily unavailable. Please try again or use COD.';
+      } else if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      onFailure(errorMessage);
       toast({
         title: 'Payment Error',
-        description: error.response?.data?.detail || 'Failed to initialize payment gateway',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
