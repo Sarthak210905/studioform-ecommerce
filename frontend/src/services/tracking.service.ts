@@ -75,7 +75,15 @@ export const trackingService = {
       throw error;
     }
   },
-try {
+
+  // Delete price alert
+  deletePriceAlert: async (alertId: string) => {
+    await api.delete(`/tracking/price-alerts/${alertId}`);
+  },
+
+  // Get product recommendations
+  getRecommendations: async (productId: string, limit: number = 6) => {
+    try {
       const { data } = await api.get<{ recommendations: ProductRecommendation[] }>(
         `/tracking/recommendations/${productId}?limit=${limit}`
       );
@@ -86,15 +94,7 @@ try {
         return [];
       }
       throw error;
-    }price-alerts/${alertId}`);
-  },
-
-  // Get product recommendations
-  getRecommendations: async (productId: string, limit: number = 6) => {
-    const { data } = await api.get<{ recommendations: ProductRecommendation[] }>(
-      `/tracking/recommendations/${productId}?limit=${limit}`
-    );
-    return data.recommendations;
+    }
   }
 };
 
