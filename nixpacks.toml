@@ -1,9 +1,10 @@
 [phases.setup]
-nixPkgs = ["python310", "nodejs-18_x"]
+nixPkgs = ["python310", "nodejs-18_x", "pip"]
 
 [phases.install]
 cmds = [
-    "pip install -r backend/requirements.txt",
+    "python -m pip install --upgrade pip",
+    "python -m pip install -r backend/requirements.txt",
     "cd frontend && npm install"
 ]
 
@@ -15,4 +16,4 @@ cmds = [
 ]
 
 [start]
-cmd = "cd backend && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
+cmd = "cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
