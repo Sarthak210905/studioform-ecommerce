@@ -1,0 +1,11 @@
+version: 1
+name: studioform-api
+services:
+  - name: backend
+    buildCommand: pip install -r requirements.txt
+    runCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    env:
+      - PORT=8000
+    regions:
+      - fra
+    instance_type: nano
