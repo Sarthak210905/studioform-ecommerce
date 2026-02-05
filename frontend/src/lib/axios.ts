@@ -73,11 +73,37 @@ api.interceptors.response.use(
     
     // Handle 401 Unauthorized
     if (error.response?.status === 401) {
-      // Clear auth state on 401
-      useAuthStore.getState().logout();
-      if (window.location.pathname !== '/login' && !window.location.pathname.startsWith('/auth/')) {
+      // Define public routes that don't require authentication
+      const publicRoutes = [
+        '/',
+        '/products',
+        '/about',
+        '/contact',
+        '/faq',
+        '/privacy',
+        '/terms',
+        '/refund',
+        '/shipping',
+        '/login',
+        '/register',
+      ];
+      
+      const currentPath = window.location.pathname;
+      
+      // Check if current path is a public route or product detail page
+      const isPublicRoute = publicRoutes.some(route => 
+        currentPath === route || 
+        currentPath.startsWith('/products/') ||
+        currentPath.startsWith('/auth/')
+      );
+      
+      // Only clear auth and redirect if NOT on a public route
+      if (!isPublicRoute) {
+        useAuthStore.getState().logout();
         window.location.href = '/login';
       }
+      // For public routes, just log the error but don't redirect
+      console.log('Authentication required for this feature');
     }
     
     // Handle network errors

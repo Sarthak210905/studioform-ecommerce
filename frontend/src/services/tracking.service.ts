@@ -40,10 +40,18 @@ export const trackingService = {
 
   // Get recently viewed products
   getRecentlyViewed: async (limit: number = 10) => {
-    const { data } = await api.get<{ items: RecentlyViewedProduct[] }>(
-      `/tracking/recently-viewed?limit=${limit}`
-    );
-    return data.items;
+    try {
+      const { data } = await api.get<{ items: RecentlyViewedProduct[] }>(
+        `/tracking/recently-viewed?limit=${limit}`
+      );
+      return data.items;
+    } catch (error: any) {
+      // Return empty array if user is not authenticated
+      if (error.response?.status === 401) {
+        return [];
+      }
+      throw error;
+    }
   },
 
   // Create price alert
@@ -56,13 +64,29 @@ export const trackingService = {
 
   // Get price alerts
   getPriceAlerts: async () => {
-    const { data } = await api.get<{ alerts: PriceAlert[] }>('/tracking/price-alerts');
-    return data.alerts;
+    try {
+      const { data } = await api.get<{ alerts: PriceAlert[] }>('/tracking/price-alerts');
+      return data.alerts;
+    } catch (error: any) {
+      // Return empty array if user is not authenticated
+      if (error.response?.status === 401) {
+        return [];
+      }
+      throw error;
+    }
   },
-
-  // Delete price alert
-  deletePriceAlert: async (alertId: string) => {
-    await api.delete(`/tracking/price-alerts/${alertId}`);
+try {
+      const { data } = await api.get<{ recommendations: ProductRecommendation[] }>(
+        `/tracking/recommendations/${productId}?limit=${limit}`
+      );
+      return data.recommendations;
+    } catch (error: any) {
+      // Return empty array if user is not authenticated
+      if (error.response?.status === 401) {
+        return [];
+      }
+      throw error;
+    }price-alerts/${alertId}`);
   },
 
   // Get product recommendations
