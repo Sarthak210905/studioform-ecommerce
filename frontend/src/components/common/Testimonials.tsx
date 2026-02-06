@@ -82,16 +82,6 @@ export default function Testimonials() {
     return () => clearInterval(interval);
   }, [isAutoPlaying, totalSlides]);
 
-  const goToNext = () => {
-    setCurrentSlide((prev) => (prev + 1) % totalSlides);
-    setIsAutoPlaying(false);
-  };
-
-  const goToPrev = () => {
-    setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
-    setIsAutoPlaying(false);
-  };
-
   const goToSlide = (index: number) => {
     setCurrentSlide(index);
     setIsAutoPlaying(false);

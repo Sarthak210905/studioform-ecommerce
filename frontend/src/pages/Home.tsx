@@ -28,8 +28,6 @@ type ImageTile = {
 };
 
 // State-driven data
-const pressLogos = ['Vogue', 'GQ', 'Hypebeast', 'TechRadar', 'Design Milk'];
-
 function formatPrice(p?: number) {
   if (typeof p !== 'number') return '';
   return `₹${p.toLocaleString('en-IN')}`;
@@ -425,7 +423,7 @@ function ImageGrid({ items, columns = 'md:grid-cols-4', loading }: { items: Imag
             <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
             <div className="absolute inset-0 flex items-center">
               <div className="p-6 md:p-10 max-w-lg space-y-3 text-white">
-                <Badge variant="secondary" className="bg-white/90 text-black">Free duffle bag</Badge>
+                {/* <Badge variant="secondary" className="bg-white/90 text-black">Free duffle bag</Badge> */}
                 <h2 className="text-xl sm:text-3xl font-bold">Adapters for every move</h2>
                 <p className="text-sm text-white/80">Charge, connect, and gift-ready packs.</p>
                 <Button variant="secondary" asChild>
