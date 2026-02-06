@@ -252,19 +252,25 @@ export default function Checkout() {
         return;
       }
       const selectedAddress = savedAddresses.find(addr => addr.id === selectedAddressId);
-      if (selectedAddress) {
-        shippingAddress = {
-          full_name: selectedAddress.full_name,
-          phone: selectedAddress.phone,
-          address_line1: selectedAddress.address_line1,
-          address_line2: selectedAddress.address_line2 || '',
-          city: selectedAddress.city,
-          state: selectedAddress.state,
-          pincode: selectedAddress.pincode,
-          country: selectedAddress.country,
-        };
-        phone = selectedAddress.phone;
+      if (!selectedAddress) {
+        toast({
+          title: 'Address Not Found',
+          description: 'Selected address could not be found',
+          variant: 'destructive',
+        });
+        return;
       }
+      shippingAddress = {
+        full_name: selectedAddress.full_name,
+        phone: selectedAddress.phone,
+        address_line1: selectedAddress.address_line1,
+        address_line2: selectedAddress.address_line2 || undefined,
+        city: selectedAddress.city,
+        state: selectedAddress.state,
+        pincode: selectedAddress.pincode,
+        country: selectedAddress.country || 'India',
+      };
+      phone = selectedAddress.phone;
     }
 
     setLoading(true);
@@ -281,6 +287,7 @@ export default function Checkout() {
         coupon_code: couponCode || undefined,
       };
 
+      console.log('Creating order with data:', orderData);
       const response = await api.post('/orders/', orderData);
 
       // Store user details for Razorpay
@@ -302,9 +309,11 @@ export default function Checkout() {
         setShowRazorpay(true);
       }
     } catch (error: any) {
+      console.error('Order creation failed:', error);
+      console.error('Error response:', error.response?.data);
       toast({
         title: 'Order Failed',
-        description: error.response?.data?.detail || 'Failed to place order',
+        description: error.response?.data?.detail || 'Failed to place order. Please try again.',
         variant: 'destructive',
       });
     } finally {
