@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Instagram, Twitter, Facebook, Mail, MapPin, Phone, ArrowRight } from 'lucide-react';
+import { Instagram, Twitter, Facebook, Mail, MapPin, ArrowRight } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import TrustBadges from '@/components/common/TrustBadges';
 import NewsletterSignup from '@/components/common/NewsletterSignup';
@@ -77,18 +77,11 @@ export default function Footer() {
               </p>
               <div className="space-y-2 text-sm text-muted-foreground">
                 <a 
-                  href="mailto:hello@studioform.com" 
+                  href="mailto:contact.studioform@gmail.com" 
                   className="flex items-center gap-2 hover:text-foreground transition-colors group"
                 >
                   <Mail className="h-4 w-4 group-hover:text-primary transition-colors" />
-                  <span>hello@studioform.com</span>
-                </a>
-                <a 
-                  href="tel:+911234567890" 
-                  className="flex items-center gap-2 hover:text-foreground transition-colors group"
-                >
-                  <Phone className="h-4 w-4 group-hover:text-primary transition-colors" />
-                  <span>+91 123 456 7890</span>
+                  <span>contact.studioform@gmail.com</span>
                 </a>
                 <div className="flex items-start gap-2">
                   <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />

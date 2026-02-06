@@ -157,9 +157,8 @@ export default function PrivacyPolicy() {
               If you have any questions about this Privacy Policy or our data practices, please contact us at:
             </p>
             <div className="mt-3 text-muted-foreground">
-              <p><strong>Email:</strong> privacy@premiumdeskaccessories.com</p>
-              <p><strong>Phone:</strong> +91 1234567890</p>
-              <p><strong>Address:</strong> 123 Business Street, Indore, MP 452001, India</p>
+              <p><strong>Email:</strong> contact.studioform@gmail.com</p>
+              <p><strong>Address:</strong> Indore, Madhya Pradesh, India</p>
             </div>
           </section>
         </CardContent>

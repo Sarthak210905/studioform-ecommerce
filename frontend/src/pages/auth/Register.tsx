@@ -385,7 +385,7 @@ export default function Register() {
       <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900">
         {/* Background Image */}
         <div 
-          className="absolute inset-0 bg-cover  opacity-60"
+          className="absolute inset-0 bg-cover opacity-60"
           style={{
             backgroundImage: "url('https://lh3.googleusercontent.com/sitesv/APaQ0STZcxSbrVWDnZSef90T92_6tYWbGUoBGnFxrfEJ1yK6pluhTpAJAVKPb1NILN6qLPSlxTl47gBHgPudTMJq4lWwoaial7crRWHs1eHaZLWUangyhTwKvfIkTLm2MRUTib-6hd_fFhdQqjboW8qv93_VXoEsF_m6dJcEQ3pqzzp5j1aVrZkrfesS=w16383')"
           }}

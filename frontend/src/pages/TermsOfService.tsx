@@ -203,9 +203,8 @@ export default function TermsOfService() {
               For questions about these Terms of Service, please contact us:
             </p>
             <div className="mt-3 text-muted-foreground">
-              <p><strong>Email:</strong> support@premiumdeskaccessories.com</p>
-              <p><strong>Phone:</strong> +91 1234567890</p>
-              <p><strong>Address:</strong> 123 Business Street, Indore, MP 452001, India</p>
+              <p><strong>Email:</strong> contact.studioform@gmail.com</p>
+              <p><strong>Address:</strong> Indore, Madhya Pradesh, India</p>
             </div>
           </section>
         </CardContent>

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, MapPin } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Breadcrumb from '@/components/common/Breadcrumb';
 import { api } from '@/lib/axios';
@@ -68,19 +68,7 @@ export default function Contact() {
               </div>
               <div>
                 <h3 className="font-semibold text-sm sm:text-base mb-0.5 sm:mb-1">Email</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">support@studioform.com</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4 sm:p-5 md:p-6 flex gap-3 sm:gap-4">
-              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Phone className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-sm sm:text-base mb-0.5 sm:mb-1">Phone</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">+91 98765 43210</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">contact.studioform@gmail.com</p>
               </div>
             </CardContent>
           </Card>

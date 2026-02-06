@@ -33,9 +33,8 @@ export const getOrganizationSchema = () => ({
   logo: `${window.location.origin}/logo.png`,
   contactPoint: {
     '@type': 'ContactPoint',
-    telephone: '+91-9876543210',
     contactType: 'Customer Service',
-    email: 'support@premiumdeskaccessories.com',
+    email: 'contact.studioform@gmail.com',
   },
   sameAs: [
     'https://www.facebook.com/premiumdeskaccessories',
