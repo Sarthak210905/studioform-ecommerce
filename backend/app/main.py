@@ -27,6 +27,7 @@ from app.api.routes import shipping
 from app.api.routes import banners
 from app.api.routes import contact
 from app.api.routes import newsletter
+from app.api.routes import upload
 
 # Optional routes
 try:
@@ -222,6 +223,7 @@ app.include_router(shipping.router, prefix="/shipping", tags=["Shipping"])
 app.include_router(banners.router, prefix="/banners", tags=["Banners"])
 app.include_router(contact.router, prefix="/contact", tags=["Contact"])
 app.include_router(newsletter.router, prefix="/newsletter", tags=["Newsletter"])
+app.include_router(upload.router, prefix="/upload", tags=["Upload"])
 
 # Register optional routers
 if payment:

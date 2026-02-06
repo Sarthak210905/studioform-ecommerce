@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Cloud, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { api } from '@/lib/axios';
 
 interface ImageUploadProps {
   onUpload: (url: string) => void;
@@ -37,24 +38,12 @@ export function ImageUpload({ onUpload, preview, onClear }: ImageUploadProps) {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'desk_accessories');
 
-      const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-      if (!cloudName) {
-        throw new Error('Cloudinary configuration missing');
-      }
-
-      const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-        method: 'POST',
-        body: formData,
+      const { data } = await api.post('/upload/image', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      if (!response.ok) {
-        throw new Error('Upload failed');
-      }
-
-      const data = await response.json();
-      onUpload(data.secure_url);
+      onUpload(data.url);
 
       toast({
         title: 'Success',
