@@ -4,7 +4,7 @@ import SEOHead from '@/components/common/SEOHead';
 
 export default function TermsOfService() {
   return (
-    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 max-w-4xl">
       <SEOHead
         title="Terms of Service"
         description="Terms of Service for Premium Desk Accessories - Read our terms and conditions for using our services"

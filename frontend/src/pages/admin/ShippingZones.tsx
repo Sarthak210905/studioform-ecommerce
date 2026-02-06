@@ -158,7 +158,7 @@ export default function ShippingZones() {
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold">Shipping Zones</h1>

@@ -169,7 +169,7 @@ export default function AdminCouponsPage() {
   }
 
   return (
-    <div className="p-6">
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Coupon Management</h1>
         <Dialog open={showDialog} onOpenChange={setShowDialog}>

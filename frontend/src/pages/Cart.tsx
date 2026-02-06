@@ -43,7 +43,7 @@ export default function Cart() {
 
   if (items.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 py-16 max-w-7xl">
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16">
             <ShoppingBag className="h-24 w-24 text-muted-foreground mb-4" />
@@ -61,7 +61,7 @@ export default function Cart() {
   }
 
   return (
-    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 max-w-7xl">
       <div className="mb-4 sm:mb-6 md:mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">Shopping Cart</h1>
         <p className="text-sm sm:text-base text-muted-foreground">
