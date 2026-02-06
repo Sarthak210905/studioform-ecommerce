@@ -16,7 +16,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingCart, Heart, User, LogOut, Package, Settings, Menu, Search, Sparkles } from 'lucide-react';
+import { ShoppingCart, Heart, User, LogOut, Package, Settings, Menu, Search } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useCartStore } from '@/store/cartStore';
 import NotificationBell from '@/components/common/NotificationBell';
