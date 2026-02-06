@@ -3,14 +3,20 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowRight, Sparkles, Star, Zap, Shield, Swords, Wand2 } from 'lucide-react';
+import { ArrowRight, Sparkles, Star, Zap, Shield, Swords, Wand2, Crown, Flame, Heart, Package } from 'lucide-react';
 import { productService } from '@/services/product.service';
+import { collectionService, type Collection } from '@/services/collection.service';
 import type { Product } from '@/types';
 import SEOHead from '@/components/common/SEOHead';
 import LazyImage from '@/components/common/LazyImage';
 
-// Collection metadata
-const COLLECTION_DATA: Record<string, {
+// Icon map for dynamic rendering from DB
+const ICON_MAP: Record<string, React.ElementType> = {
+  Sparkles, Star, Shield, Zap, Swords, Wand2, Crown, Flame, Heart, Package,
+};
+
+// Fallback hardcoded data (used only if API collections not loaded yet)
+const FALLBACK_COLLECTION_DATA: Record<string, {
   title: string;
   subtitle: string;
   description: string;
@@ -66,23 +72,57 @@ const COLLECTION_DATA: Record<string, {
   },
 };
 
-const ALL_COLLECTIONS = Object.keys(COLLECTION_DATA);
+const FALLBACK_NAMES = Object.keys(FALLBACK_COLLECTION_DATA);
+
+// Helper: convert API collection to display metadata
+function collectionToMeta(col: Collection) {
+  return {
+    title: col.title,
+    subtitle: col.subtitle,
+    description: col.description,
+    icon: ICON_MAP[col.icon_name] || Sparkles,
+    gradient: col.gradient,
+    accent: col.accent_color,
+    bgPattern: col.bg_pattern || 'bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))]',
+    bannerImage: col.banner_image,
+    productCount: col.product_count,
+  };
+}
 
 export default function SpecialEditions() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeCollection = searchParams.get('collection') || '';
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [collections, setCollections] = useState<string[]>([]);
+  const [apiCollections, setApiCollections] = useState<Collection[]>([]);
+  const [collectionNames, setCollectionNames] = useState<string[]>([]);
 
-  // Load available collections
+  // Build a lookup from collection name -> display meta (API-first, fallback second)
+  const COLLECTION_DATA: Record<string, ReturnType<typeof collectionToMeta>> = {};
+  for (const col of apiCollections) {
+    COLLECTION_DATA[col.name] = collectionToMeta(col);
+  }
+  // Merge fallback for any missing
+  for (const name of FALLBACK_NAMES) {
+    if (!COLLECTION_DATA[name]) {
+      const fb = FALLBACK_COLLECTION_DATA[name];
+      COLLECTION_DATA[name] = { ...fb, bannerImage: null, productCount: 0 };
+    }
+  }
+
+  // Load collections from API
   useEffect(() => {
     async function loadCollections() {
       try {
-        const data = await productService.getCollections();
-        setCollections(data.length > 0 ? data : ALL_COLLECTIONS);
+        const data = await collectionService.getCollections();
+        if (data.length > 0) {
+          setApiCollections(data);
+          setCollectionNames(data.map((c) => c.name));
+        } else {
+          setCollectionNames(FALLBACK_NAMES);
+        }
       } catch {
-        setCollections(ALL_COLLECTIONS);
+        setCollectionNames(FALLBACK_NAMES);
       }
     }
     loadCollections();
@@ -138,6 +178,13 @@ export default function SpecialEditions() {
 
       {/* Hero Section */}
       <section className={`relative overflow-hidden ${currentMeta ? `bg-gradient-to-br ${currentMeta.gradient}` : 'bg-gradient-to-br from-purple-950 via-indigo-900 to-slate-900'} text-white`}>
+        {/* Banner image from collection */}
+        {currentMeta?.bannerImage && (
+          <>
+            <img src={currentMeta.bannerImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-black/50" />
+          </>
+        )}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRoLTJ2LTRoMnYtNGgtNHYyaC00di0ySDIwdjRoMnY0aC0ydjRoNHYtMmg0djJoNHYtNGgtMnYtNHptMC0xMGgtMlYyMGgydi00aC00djJoLTR2LTJIMjB2NGgydjRoLTJ2NGg0di0yaDR2Mmg0di00aC0ydi00eiIvPjwvZz48L2c+PC9zdmc+')] opacity-30" />
         </div>
@@ -186,7 +233,7 @@ export default function SpecialEditions() {
               <Sparkles className="h-3.5 w-3.5 mr-1" />
               All Editions
             </Button>
-            {(collections.length > 0 ? collections : ALL_COLLECTIONS).map((col) => {
+            {(collectionNames.length > 0 ? collectionNames : FALLBACK_NAMES).map((col) => {
               const meta = COLLECTION_DATA[col];
               if (!meta) return null;
               const Icon = meta.icon;
@@ -212,8 +259,9 @@ export default function SpecialEditions() {
         <section className="container px-3 sm:px-4 md:px-8 py-6 sm:py-8">
           <h2 className="text-lg sm:text-xl font-semibold mb-4">Browse Collections</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            {ALL_COLLECTIONS.map((col) => {
+            {(collectionNames.length > 0 ? collectionNames : FALLBACK_NAMES).map((col) => {
               const meta = COLLECTION_DATA[col];
+              if (!meta) return null;
               const Icon = meta.icon;
               const colProducts = products.filter(p => p.tags?.includes(col));
               return (
@@ -222,13 +270,20 @@ export default function SpecialEditions() {
                   onClick={() => handleCollectionChange(col)}
                   className={`group relative rounded-xl overflow-hidden bg-gradient-to-br ${meta.gradient} text-white p-5 sm:p-6 text-left hover:shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]`}
                 >
+                  {/* Banner image if available */}
+                  {meta.bannerImage && (
+                    <>
+                      <img src={meta.bannerImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors" />
+                    </>
+                  )}
                   <div className="absolute top-3 right-3 opacity-20 group-hover:opacity-30 transition-opacity">
                     <Icon className="h-16 w-16" />
                   </div>
                   <div className="relative z-10 space-y-2">
                     <div className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-full ${meta.accent} text-white`}>
                       <Icon className="h-3 w-3" />
-                      {colProducts.length} Products
+                      {meta.productCount || colProducts.length} Products
                     </div>
                     <h3 className="text-xl font-bold">{meta.title}</h3>
                     <p className="text-sm text-white/70">{meta.subtitle}</p>

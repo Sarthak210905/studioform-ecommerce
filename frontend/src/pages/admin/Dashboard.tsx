@@ -19,7 +19,8 @@ import {
   Truck,
   Mail,
   Settings,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Sparkles
 } from 'lucide-react';
 import { api } from '@/lib/axios';
 
@@ -131,6 +132,12 @@ export default function AdminDashboard() {
             <Link to="/admin/orders">
               <Eye className="mr-2 h-4 w-4" />
               View Orders
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link to="/admin/special-editions">
+              <Sparkles className="mr-2 h-4 w-4" />
+              Special Editions
             </Link>
           </Button>
           <Button variant="outline" asChild>
@@ -376,6 +383,12 @@ export default function AdminDashboard() {
               <Link to="/admin/shipping">
                 <Truck className="h-6 w-6 mb-2" />
                 <span>Shipping</span>
+              </Link>
+            </Button>
+            <Button variant="outline" className="h-auto flex-col py-4" asChild>
+              <Link to="/admin/special-editions">
+                <Sparkles className="h-6 w-6 mb-2" />
+                <span>Special Editions</span>
               </Link>
             </Button>
             <Button variant="outline" className="h-auto flex-col py-4" asChild>

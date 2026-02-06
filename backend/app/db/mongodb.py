@@ -17,6 +17,7 @@ from app.models.shipping_zone import ShippingZone
 from app.models.banner import HeroBanner
 from app.models.newsletter import NewsletterSubscriber
 from app.models.contact import ContactSubmission
+from app.models.collection import Collection
 
 # MongoDB client
 client = None
@@ -48,6 +49,7 @@ async def init_db():
             HeroBanner,
             ContactSubmission,
             NewsletterSubscriber,
+            Collection,
         ]
     )
 

@@ -304,7 +304,7 @@ function ImageGrid({ items, columns = 'md:grid-cols-4', loading }: { items: Imag
             const pivotBanner = heroBanners.find(b => b.position === 2) || heroBanners[1];
             return (
               <div className="rounded-2xl overflow-hidden relative">
-                <div className="aspect-[16/6] md:aspect-[16/5]">
+                <div className="aspect-[16/7] md:aspect-[16/6]">
                   <img
                     src={pivotBanner.image_url}
                     alt={pivotBanner.name}
@@ -314,7 +314,7 @@ function ImageGrid({ items, columns = 'md:grid-cols-4', loading }: { items: Imag
                 <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
                 <div className="absolute inset-0 flex items-center">
                   <div className="p-6 md:p-10 max-w-lg space-y-3 text-white">
-                    <Badge variant="secondary" className="bg-white/90 text-black">New Drop</Badge>
+                    {/* <Badge variant="secondary" className="bg-white/90 text-black">New Drop</Badge> */}
                     <h2 className="text-3xl font-bold">{pivotBanner.title}</h2>
                     <p className="text-sm text-white/80">{pivotBanner.description}</p>
                     {pivotBanner.cta_link && pivotBanner.cta_text ? (
@@ -333,7 +333,7 @@ function ImageGrid({ items, columns = 'md:grid-cols-4', loading }: { items: Imag
           })()
         ) : (
           <div className="rounded-2xl overflow-hidden relative">
-            <div className="aspect-[16/6] md:aspect-[16/5]">
+            <div className="aspect-[16/7] md:aspect-[16/6]">
               <img
                 src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1600&q=80"
                 alt="Pivot"
@@ -343,7 +343,7 @@ function ImageGrid({ items, columns = 'md:grid-cols-4', loading }: { items: Imag
             <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent" />
             <div className="absolute inset-0 flex items-center">
               <div className="p-6 md:p-10 max-w-lg space-y-3 text-white">
-                <Badge variant="secondary" className="bg-white/90 text-black">New Drop</Badge>
+                {/* <Badge variant="secondary" className="bg-white/90 text-black">New Drop</Badge> */}
                 <h2 className="text-3xl font-bold">Pivot Collection</h2>
                 <p className="text-sm text-white/80">Balanced carry built for daily moves.</p>
                 <Button variant="secondary" asChild>
@@ -386,7 +386,7 @@ function ImageGrid({ items, columns = 'md:grid-cols-4', loading }: { items: Imag
             const giftingBanner = heroBanners.find(b => b.position === 3) || heroBanners[2];
             return (
               <div className="rounded-2xl overflow-hidden relative">
-                <div className="aspect-[16/6] md:aspect-[16/5]">
+                <div className="aspect-[16/7] md:aspect-[16/6]">
                   <img
                     src={giftingBanner.image_url}
                     alt={giftingBanner.name}
@@ -415,7 +415,7 @@ function ImageGrid({ items, columns = 'md:grid-cols-4', loading }: { items: Imag
           })()
         ) : (
           <div className="rounded-2xl overflow-hidden relative">
-            <div className="aspect-[16/6] md:aspect-[16/5]">
+            <div className="aspect-[16/7] md:aspect-[16/6]">
               <img
                 src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1600&q=80"
                 alt="Gifting"

@@ -46,6 +46,7 @@ const AdminReturns = lazy(() => import('./pages/admin/ReturnsManagement'));
 const ShippingZones = lazy(() => import('./pages/admin/ShippingZones'));
 const AdminAnalytics = lazy(() => import('./pages/admin/Analytics'));
 const AdminBanners = lazy(() => import('./pages/admin/BannersManagement'));
+const AdminSpecialEditions = lazy(() => import('./pages/admin/SpecialEditionsManagement'));
 const AdminSettings = lazy(() => import('./pages/admin/Settings'));
 const AdminNewsletter = lazy(() => import('./pages/admin/Newsletter'));
 
@@ -156,6 +157,7 @@ function App() {
                 <Route path="/admin/returns" element={<AdminReturns />} />
                 <Route path="/admin/analytics" element={<AdminAnalytics />} />
                 <Route path="/admin/banners" element={<AdminBanners />} />
+                <Route path="/admin/special-editions" element={<AdminSpecialEditions />} />
                 <Route path="/admin/settings" element={<AdminSettings />} />
                 <Route path="/admin/newsletter" element={<AdminNewsletter />} />
               </Route>
