@@ -8,7 +8,7 @@ from fastapi.responses import StreamingResponse
 
 from app.models.product import Product, ProductVariant
 from app.models.user import User
-from app.models.recently_viewed import RecentlyViewed
+from app.models.tracking import RecentlyViewed
 from app.schemas.product import ProductResponse
 from app.services.auth import get_current_active_user
 from app.services.cloudinary import upload_image
