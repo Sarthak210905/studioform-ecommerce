@@ -36,8 +36,9 @@ export default function ProductRecommendations({ currentProductId, category }: P
         },
       });
       
-      // Filter out current product
-      const filtered = response.data.filter((p: Product) => p.id !== currentProductId);
+      // Filter out current product from the products array
+      const productsData = response.data.products || [];
+      const filtered = productsData.filter((p: Product) => p.id !== currentProductId);
       setProducts(filtered.slice(0, 4));
     } catch (error) {
       console.error('Failed to load recommendations:', error);
