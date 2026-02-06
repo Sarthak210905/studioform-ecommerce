@@ -5,6 +5,8 @@ from typing import Optional
 
 from app.models.order import Order
 from app.models.user import User
+from app.models.product import Product
+from app.models.cart import CartItem
 from app.schemas.payment import CreateRazorpayOrder, VerifyPayment, RazorpayOrderResponse
 from app.services.auth import get_current_active_user
 from app.services.razorpay_service import (
