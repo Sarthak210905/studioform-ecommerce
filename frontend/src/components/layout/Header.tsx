@@ -92,14 +92,14 @@ export default function Header() {
                   >
                     Products
                   </Link>
-                  <Link 
+                  {/* <Link 
                     to="/special-editions" 
                     className="text-base font-medium py-2 hover:text-primary transition-colors flex items-center gap-1.5"
                     onClick={closeMobileMenu}
                   >
                     
                     Special Editions
-                  </Link>
+                  </Link> */}
                   <Link 
                     to="/about" 
                     className="text-base font-medium py-2 hover:text-primary transition-colors"
@@ -186,10 +186,10 @@ export default function Header() {
             <Link to="/products" className="text-sm font-medium hover:text-primary transition-colors">
               Products
             </Link>
-            <Link to="/special-editions" className="text-sm font-medium hover:text-primary transition-colors flex items-center gap-1">
+            {/* <Link to="/special-editions" className="text-sm font-medium hover:text-primary transition-colors flex items-center gap-1">
               
               Special Editions
-            </Link>
+            </Link> */}
             <Link to="/about" className="text-sm font-medium hover:text-primary transition-colors">
               About
             </Link>

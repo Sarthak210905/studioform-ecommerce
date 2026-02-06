@@ -257,7 +257,7 @@ function ImageGrid({ items, columns = 'md:grid-cols-4', loading }: { items: Imag
                 <div className="absolute inset-0 flex items-center">
                   <div className="container px-4 sm:px-6 md:px-12 lg:px-16">
                     <div className="max-w-xl space-y-2 sm:space-y-3 md:space-y-4 text-white">
-                      <Badge variant="secondary" className="bg-white/90 text-black text-xs">New collection</Badge>
+                      {/* <Badge variant="secondary" className="bg-white/90 text-black text-xs">New collection</Badge> */}
                       <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">{mainBanner.title}</h1>
                       <p className="text-xs sm:text-sm md:text-base text-white/85 line-clamp-2 sm:line-clamp-3">{mainBanner.description}</p>
                       <div className="flex gap-2 sm:gap-3 flex-wrap pt-2">
@@ -315,7 +315,7 @@ function ImageGrid({ items, columns = 'md:grid-cols-4', loading }: { items: Imag
                 <div className="absolute inset-0 flex items-center">
                   <div className="p-6 md:p-10 max-w-lg space-y-3 text-white">
                     {/* <Badge variant="secondary" className="bg-white/90 text-black">New Drop</Badge> */}
-                    <h2 className="text-3xl font-bold">{pivotBanner.title}</h2>
+                    <h2 className="text-xl font-bold">{pivotBanner.title}</h2>
                     <p className="text-sm text-white/80">{pivotBanner.description}</p>
                     {pivotBanner.cta_link && pivotBanner.cta_text ? (
                       <Button variant="secondary" asChild>
@@ -344,7 +344,7 @@ function ImageGrid({ items, columns = 'md:grid-cols-4', loading }: { items: Imag
             <div className="absolute inset-0 flex items-center">
               <div className="p-6 md:p-10 max-w-lg space-y-3 text-white">
                 {/* <Badge variant="secondary" className="bg-white/90 text-black">New Drop</Badge> */}
-                <h2 className="text-3xl font-bold">Pivot Collection</h2>
+                <h2 className="text-xl font-bold">Pivot Collection</h2>
                 <p className="text-sm text-white/80">Balanced carry built for daily moves.</p>
                 <Button variant="secondary" asChild>
                   <Link to="/products">Shop collection</Link>
@@ -397,7 +397,7 @@ function ImageGrid({ items, columns = 'md:grid-cols-4', loading }: { items: Imag
                 <div className="absolute inset-0 flex items-center">
                   <div className="p-6 md:p-10 max-w-lg space-y-3 text-white">
                     {/* <Badge variant="secondary" className="bg-white/90 text-black">Free duffle bag</Badge> */}
-                    <h2 className="text-3xl font-bold">{giftingBanner.title}</h2>
+                    <h2 className="text-xl font-bold">{giftingBanner.title}</h2>
                     <p className="text-sm text-white/80">{giftingBanner.description}</p>
                     {giftingBanner.cta_link && giftingBanner.cta_text ? (
                       <Button variant="secondary" asChild>
@@ -426,7 +426,7 @@ function ImageGrid({ items, columns = 'md:grid-cols-4', loading }: { items: Imag
             <div className="absolute inset-0 flex items-center">
               <div className="p-6 md:p-10 max-w-lg space-y-3 text-white">
                 <Badge variant="secondary" className="bg-white/90 text-black">Free duffle bag</Badge>
-                <h2 className="text-3xl font-bold">Adapters for every move</h2>
+                <h2 className="text-xl font-bold">Adapters for every move</h2>
                 <p className="text-sm text-white/80">Charge, connect, and gift-ready packs.</p>
                 <Button variant="secondary" asChild>
                   <Link to="/products">Shop gifting</Link>
