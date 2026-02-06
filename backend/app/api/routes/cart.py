@@ -110,7 +110,7 @@ async def add_to_cart(
         user_id=str(current_user.id),
         product_id=cart_item.product_id,
         product_name=product.name,
-        product_price=product.price,
+        product_price=product.final_price,
         quantity=cart_item.quantity,
         image_url=main_image  # Fixed: use main_image from images array
     )
@@ -179,7 +179,7 @@ async def update_cart_item(
     
     # Update quantity
     cart_item.quantity = update_data.quantity
-    cart_item.product_price = product.price
+    cart_item.product_price = product.final_price
     cart_item.updated_at = datetime.utcnow()
     await cart_item.save()
     

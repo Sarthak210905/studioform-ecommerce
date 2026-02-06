@@ -1,19 +1,28 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useCartStore } from '@/store/cartStore';
 import ExitIntentPopup from '@/components/common/ExitIntentPopup';
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
+import { productService } from '@/services/product.service';
+import type { Product } from '@/types';
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, ArrowLeft } from 'lucide-react';
 
 export default function Cart() {
   const navigate = useNavigate();
   const { items, cart, updateQuantity, removeItem, clearCart } = useCartStore();
+  const [suggestions, setSuggestions] = useState<Product[]>([]);
 
   useEffect(() => {
     // Recalculate totals when component mounts
     useCartStore.getState().calculateTotal();
+    // Load cross-sell suggestions
+    productService.getFeaturedProducts(4).then((products) => {
+      // Filter out products already in cart
+      const cartProductIds = new Set(useCartStore.getState().items.map(i => i.product_id));
+      setSuggestions((products || []).filter((p: Product) => !cartProductIds.has(p.id)).slice(0, 4));
+    }).catch(() => {});
   }, []);
 
   const handleUpdateQuantity = (productId: string, newQuantity: number) => {
@@ -158,13 +167,26 @@ export default function Cart() {
           })}
 
           {/* Clear Cart Button */}
-          <Button
-            variant="outline"
-            onClick={clearCart}
-            className="w-full"
-          >
-            Clear Cart
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              asChild
+              className="flex-1"
+            >
+              <Link to="/products">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Continue Shopping
+              </Link>
+            </Button>
+            <Button
+              variant="outline"
+              onClick={clearCart}
+              className="flex-1 text-destructive hover:text-destructive"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Clear Cart
+            </Button>
+          </div>
         </div>
 
         {/* Order Summary */}
@@ -213,6 +235,34 @@ export default function Cart() {
           </Card>
         </div>
       </div>
+
+      {/* Cross-sell Suggestions */}
+      {suggestions.length > 0 && (
+        <div className="mt-8 sm:mt-12">
+          <h2 className="text-lg sm:text-xl font-bold mb-4">You might also like</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+            {suggestions.map((product) => (
+              <Link key={product.id} to={`/products/${product.id}`} className="group">
+                <Card className="overflow-hidden hover:shadow-md transition-shadow">
+                  <div className="aspect-square bg-muted overflow-hidden">
+                    {product.main_image && (
+                      <img
+                        src={product.main_image}
+                        alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    )}
+                  </div>
+                  <CardContent className="p-2.5 sm:p-3">
+                    <p className="text-sm font-medium line-clamp-1 group-hover:text-primary transition-colors">{product.name}</p>
+                    <p className="text-sm font-bold mt-1">₹{product.final_price.toLocaleString()}</p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Exit Intent Popup */}
       <ExitIntentPopup cartItemCount={items.length} />

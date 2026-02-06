@@ -14,8 +14,8 @@ export default function TrustBadges() {
     },
     {
       icon: RotateCcw,
-      title: '7 Day Return',
-      description: 'Money Back Guarantee',
+      title: '7 Day Exchange',
+      description: 'For defective products',
     },
     {
       icon: Truck,

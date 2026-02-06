@@ -16,6 +16,7 @@ import { Loader2, CreditCard, Truck, MapPin, Package, ShieldCheck } from 'lucide
 import RazorpayPayment from '@/components/common/RazorpayPayment';
 import shippingService from '@/services/shipping.service';
 import TrustBadges from '@/components/common/TrustBadges';
+import { trackPurchase, trackBeginCheckout } from '@/utils/analytics';
 
 interface Address {
   id: string;
@@ -78,6 +79,17 @@ export default function Checkout() {
       navigate('/cart');
       return;
     }
+    
+    // Track begin checkout event
+    trackBeginCheckout(
+      total,
+      items.map((item) => ({
+        item_id: item.product_id,
+        item_name: item.product_name,
+        price: item.product_price,
+        quantity: item.quantity,
+      }))
+    );
     
     // Start aggressive keep-alive during checkout
     const stopCriticalPing = startCriticalKeepAlive();
@@ -336,6 +348,18 @@ export default function Checkout() {
 
   const handleRazorpaySuccess = async (paymentId: string) => {
     console.log('Payment successful:', paymentId);
+    
+    // Fire GA4 purchase event for conversion tracking
+    trackPurchase(
+      orderNumber,
+      finalTotal,
+      items.map((item) => ({
+        item_id: item.product_id,
+        item_name: item.product_name,
+        price: item.product_price,
+        quantity: item.quantity,
+      }))
+    );
     
     // Clear frontend cart immediately (backend cart already cleared after payment verification)
     clearCart();
@@ -646,12 +670,17 @@ export default function Checkout() {
                 size="lg"
                 className="w-full h-11 sm:h-12 text-base touch-manipulation"
                 onClick={handlePlaceOrder}
-                disabled={loading}
+                disabled={loading || shippingCost === null}
               >
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Placing Order...
+                  </>
+                ) : shippingCost === null ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Calculating Shipping...
                   </>
                 ) : (
                   'Place Order'

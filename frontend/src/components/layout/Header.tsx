@@ -16,10 +16,11 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingCart, Heart, User, LogOut, Package, Settings, Menu } from 'lucide-react';
+import { ShoppingCart, Heart, User, LogOut, Package, Settings, Menu, Search } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useCartStore } from '@/store/cartStore';
 import NotificationBell from '@/components/common/NotificationBell';
+import { Input } from '@/components/ui/input';
 
 export default function Header() {
   const navigate = useNavigate();
@@ -29,6 +30,15 @@ export default function Header() {
   const token = useAuthStore((state) => state.token);
   const logout = useAuthStore((state) => state.logout);
   const { items, fetchCart } = useCartStore();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+    }
+  };
 
   // Calculate authentication status
   const isAuthenticated = !!user && !!token;
@@ -176,8 +186,29 @@ export default function Header() {
             </Link>
           </div>
 
+          {/* Desktop Search Bar */}
+          <form onSubmit={handleSearch} className="hidden md:flex items-center flex-1 max-w-xs mx-4">
+            <div className="relative w-full">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 h-9 text-sm"
+              />
+            </div>
+          </form>
+
           {/* Right Side Actions */}
           <div className="flex items-center gap-1 sm:gap-2">
+            {/* Mobile Search Icon */}
+            <Button variant="ghost" size="icon" className="h-9 w-9 md:hidden touch-manipulation" asChild>
+              <Link to="/products?search=">
+                <Search className="h-4 w-4" />
+              </Link>
+            </Button>
+
             {isAuthenticated && <NotificationBell />}
             
             <Button variant="ghost" size="icon" className="h-9 w-9 sm:h-10 sm:w-10 touch-manipulation" asChild>

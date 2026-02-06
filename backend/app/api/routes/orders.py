@@ -549,7 +549,7 @@ async def send_order_confirmation_email(to_email: str, order: Order):
         <p><strong>Subtotal:</strong> ₹{order.subtotal}</p>
         {discount_html}
         <p><strong>Shipping ({order.shipping_zone}):</strong> ₹{order.shipping_cost}</p>
-        <p><strong>Tax (GST):</strong> ₹{order.tax}</p>
+        <p><strong>Platform Fee (2%):</strong> ₹{order.tax}</p>
         <p style="font-size: 18px;"><strong>Total:</strong> ₹{order.total_amount}</p>
     </div>
     

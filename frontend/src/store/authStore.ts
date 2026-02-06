@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { useCartStore } from './cartStore';
 
 interface User {
   id: string;
@@ -39,6 +40,13 @@ export const useAuthStore = create<AuthState>()(
       },
       logout: () => {
         set({ user: null, token: null });
+        // Clear cart local state to prevent data leaking to next user
+        // Use setState directly to avoid the backend API call in clearCart()
+        useCartStore.setState({
+          items: [],
+          total: 0,
+          cart: { items: [], total: 0, total_price: 0, total_items: 0 },
+        });
       },
       updateUser: (user) => {
         set({ user });

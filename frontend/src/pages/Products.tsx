@@ -262,7 +262,8 @@ export default function Products() {
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
               {products.map((product) => (
-                <Card key={product.id} className="group overflow-hidden hover:shadow-lg transition-shadow">
+                <Link key={product.id} to={`/products/${product.id}`} className="block">
+                <Card className="group overflow-hidden hover:shadow-lg transition-shadow h-full">
                   <div className="aspect-square bg-muted relative overflow-hidden">
                     {product.main_image && (
                       <LazyImage
@@ -285,7 +286,7 @@ export default function Products() {
                   </div>
                   <CardContent className="p-2.5 sm:p-3 space-y-1.5">
                     <h3 className="text-sm font-semibold group-hover:text-primary transition-colors line-clamp-2">
-                      <Link to={`/products/${product.id}`}>{product.name}</Link>
+                      {product.name}
                     </h3>
                     <p className="text-xs text-muted-foreground line-clamp-1 hidden sm:block">
                       {product.description || product.category}
@@ -307,6 +308,7 @@ export default function Products() {
                     </div>
                   </CardContent>
                 </Card>
+                </Link>
               ))}
             </div>
           )}

@@ -44,6 +44,7 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [showStickyBar, setShowStickyBar] = useState(false);
+  const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
 
   // Check if product is in wishlist
   const isInWishlist = wishlistItems.some((item) => item.product_id === id);
@@ -96,15 +97,21 @@ export default function ProductDetail() {
   const handleAddToCart = () => {
     if (!product) return;
 
+    // Require variant selection if product has variants
+    if (product.has_variants && product.variants && product.variants.length > 0 && !selectedVariant) {
+      toast({ title: 'Please select a variant', description: 'Choose a size/color before adding to cart', variant: 'destructive' });
+      return;
+    }
+
     const cartItem = {
-      id: product.id,
+      id: product.id + (selectedVariant ? `-${selectedVariant}` : ''),
       product_id: product.id,
-      product_name: product.name,
-      product_price: product.final_price,
+      product_name: product.name + (selectedVariant ? ` (${product.variants?.find(v => v.sku === selectedVariant)?.name || ''})` : ''),
+      product_price: effectivePrice,
       quantity,
-      image_url: product.images?.[0] ?? '',
-      stock_quantity: product.stock,
-      subtotal: product.final_price * quantity,
+      image_url: (selectedVariant && product.variants?.find(v => v.sku === selectedVariant)?.image_url) || (product.images?.[0] ?? ''),
+      stock_quantity: effectiveStock,
+      subtotal: effectivePrice * quantity,
     };
 
     addItem(cartItem);
@@ -151,7 +158,7 @@ export default function ProductDetail() {
 
   const handleQuantityChange = (delta: number) => {
     const newQuantity = quantity + delta;
-    if (newQuantity >= 1 && newQuantity <= (product?.stock || 0)) {
+    if (newQuantity >= 1 && newQuantity <= (effectiveStock || 0)) {
       setQuantity(newQuantity);
     }
   };
@@ -159,15 +166,21 @@ export default function ProductDetail() {
   const handleBuyNow = () => {
     if (!product) return;
 
+    // Require variant selection if product has variants
+    if (product.has_variants && product.variants && product.variants.length > 0 && !selectedVariant) {
+      toast({ title: 'Please select a variant', description: 'Choose a size/color before purchasing', variant: 'destructive' });
+      return;
+    }
+
     const cartItem = {
-      id: product.id,
+      id: product.id + (selectedVariant ? `-${selectedVariant}` : ''),
       product_id: product.id,
-      product_name: product.name,
-      product_price: product.final_price,
+      product_name: product.name + (selectedVariant ? ` (${product.variants?.find(v => v.sku === selectedVariant)?.name || ''})` : ''),
+      product_price: effectivePrice,
       quantity,
-      image_url: product.images?.[0] ?? '',
-      stock_quantity: product.stock,
-      subtotal: product.final_price * quantity,
+      image_url: (selectedVariant && product.variants?.find(v => v.sku === selectedVariant)?.image_url) || (product.images?.[0] ?? ''),
+      stock_quantity: effectiveStock,
+      subtotal: effectivePrice * quantity,
     };
 
     addItem(cartItem);
@@ -208,6 +221,22 @@ export default function ProductDetail() {
     
     return 0;
   };
+
+  // Get effective price/stock based on selected variant
+  const getVariantInfo = () => {
+    if (!product) return { effectivePrice: 0, effectiveStock: 0 };
+    if (!product.has_variants || !selectedVariant) {
+      return { effectivePrice: product.final_price, effectiveStock: product.stock };
+    }
+    const variant = product.variants?.find(v => v.sku === selectedVariant);
+    if (!variant) return { effectivePrice: product.final_price, effectiveStock: product.stock };
+    return {
+      effectivePrice: Math.round((product.final_price + variant.price_adjustment) * 100) / 100,
+      effectiveStock: variant.stock,
+    };
+  };
+
+  const { effectivePrice, effectiveStock } = getVariantInfo();
 
   if (loading) {
     return (
@@ -308,12 +337,12 @@ export default function ProductDetail() {
 
           {/* Stock Status */}
           <div>
-            {product.stock > 0 ? (
+            {effectiveStock > 0 ? (
               <>
                 <p className="text-green-600 font-medium">In Stock</p>
-                {product.stock <= 10 && (
+                {effectiveStock <= 10 && (
                   <p className="text-orange-600 text-sm font-semibold mt-1">
-                    🔥 Only {product.stock} left in stock - Order soon!
+                    🔥 Only {effectiveStock} left in stock - Order soon!
                   </p>
                 )}
               </>
@@ -322,8 +351,46 @@ export default function ProductDetail() {
             )}
           </div>
 
+          {/* Variant Selector */}
+          {product.has_variants && product.variants && product.variants.length > 0 && (
+            <div>
+              <Label className="mb-2 block text-sm sm:text-base">
+                Select Variant
+              </Label>
+              <div className="flex flex-wrap gap-2">
+                {product.variants.map((variant) => (
+                  <button
+                    key={variant.sku}
+                    onClick={() => {
+                      setSelectedVariant(variant.sku === selectedVariant ? null : variant.sku);
+                      setQuantity(1);
+                    }}
+                    disabled={variant.stock === 0}
+                    className={`
+                      px-3 py-2 rounded-lg border text-sm font-medium transition-all touch-manipulation
+                      ${variant.sku === selectedVariant
+                        ? 'border-primary bg-primary/10 text-primary ring-2 ring-primary/20'
+                        : variant.stock === 0
+                          ? 'border-muted bg-muted/30 text-muted-foreground line-through cursor-not-allowed opacity-50'
+                          : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                      }
+                    `}
+                  >
+                    {variant.name}
+                    {variant.price_adjustment !== 0 && (
+                      <span className="ml-1 text-xs text-muted-foreground">
+                        ({variant.price_adjustment > 0 ? '+' : ''}₹{variant.price_adjustment})
+                      </span>
+                    )}
+                    {variant.stock === 0 && <span className="ml-1 text-xs">(Sold out)</span>}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Quantity Selector */}
-          {product.stock > 0 && (
+          {effectiveStock > 0 && (
             <div role="group" aria-label="Product quantity selector">
               <Label className="mb-2 block text-sm sm:text-base" htmlFor="quantity-display">Quantity</Label>
               <div className="flex items-center gap-2 sm:gap-3">
@@ -351,7 +418,7 @@ export default function ProductDetail() {
                   size="icon"
                   className="h-9 w-9 sm:h-10 sm:w-10 touch-manipulation"
                   onClick={() => handleQuantityChange(1)}
-                  disabled={quantity >= product.stock}
+                  disabled={quantity >= effectiveStock}
                   aria-label="Increase quantity"
                 >
                   <Plus className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
@@ -368,8 +435,8 @@ export default function ProductDetail() {
                 className="flex-1 h-11 sm:h-12 text-sm sm:text-base touch-manipulation bg-orange-600 hover:bg-orange-700"
                 size="lg"
                 onClick={handleBuyNow}
-                disabled={product.stock === 0}
-                aria-label={`Buy ${product.name} now for ${product.final_price} rupees`}
+                disabled={effectiveStock === 0}
+                aria-label={`Buy ${product.name} now for ${effectivePrice} rupees`}
               >
                 <ShoppingCart className="mr-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
                 Buy Now
@@ -379,7 +446,7 @@ export default function ProductDetail() {
                 size="lg"
                 variant="outline"
                 onClick={handleAddToCart}
-                disabled={product.stock === 0}
+                disabled={effectiveStock === 0}
                 aria-label={`Add ${quantity} ${product.name} to cart`}
               >
                 <ShoppingCart className="mr-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
@@ -481,7 +548,7 @@ export default function ProductDetail() {
       </div>
 
       {/* Sticky Action Bar - Mobile Only */}
-      {showStickyBar && product.stock > 0 && (
+      {showStickyBar && effectiveStock > 0 && (
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t shadow-lg md:hidden">
           <div className="container px-3 py-2.5 flex items-center gap-2">
             <div className="flex-1 flex gap-2">
