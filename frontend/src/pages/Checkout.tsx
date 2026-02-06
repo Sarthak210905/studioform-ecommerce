@@ -89,11 +89,20 @@ export default function Checkout() {
     };
   }, []);
   
-  // Recalculate shipping when address or payment method changes
+  // Recalculate shipping when address or payment method changes (debounced for pincode typing)
   useEffect(() => {
-    if (savedAddresses.length > 0) {
+    // Only calculate if pincode is valid (6 digits) or using saved address
+    const shouldCalculate = !useNewAddress
+      ? savedAddresses.length > 0 && selectedAddressId
+      : newAddress.pincode.length === 6 && newAddress.state;
+    
+    if (!shouldCalculate) return;
+    
+    const timer = setTimeout(() => {
       calculateShipping();
-    }
+    }, 500);
+    
+    return () => clearTimeout(timer);
   }, [selectedAddressId, useNewAddress, newAddress.pincode, newAddress.state, total, paymentMethod]);
 
   const loadAddresses = async () => {
@@ -240,6 +249,24 @@ export default function Checkout() {
         });
         return;
       }
+      // Validate phone number (Indian 10-digit)
+      if (!/^[6-9]\d{9}$/.test(newAddress.phone)) {
+        toast({
+          title: 'Invalid Phone Number',
+          description: 'Please enter a valid 10-digit Indian phone number',
+          variant: 'destructive',
+        });
+        return;
+      }
+      // Validate pincode (6 digits)
+      if (!/^\d{6}$/.test(newAddress.pincode)) {
+        toast({
+          title: 'Invalid Pincode',
+          description: 'Please enter a valid 6-digit pincode',
+          variant: 'destructive',
+        });
+        return;
+      }
       shippingAddress = newAddress;
       phone = newAddress.phone;
     } else {
@@ -295,19 +322,8 @@ export default function Checkout() {
       setOrderNumber(response.data.order_number);
       setPendingOrderId(response.data.id);
 
-      // Always proceed to Razorpay payment
-      if (false) {
-        // COD flow removed - keeping structure for clarity
-        clearCart();
-        toast({
-          title: 'Order Placed Successfully!',
-          description: `Order #${response.data.order_number}`,
-        });
-        navigate(`/order-success/${response.data.id}`);
-      } else {
-        // For Razorpay, show payment gateway
-        setShowRazorpay(true);
-      }
+      // Show Razorpay payment gateway
+      setShowRazorpay(true);
     } catch (error: any) {
       console.error('Order creation failed:', error);
       console.error('Error response:', error.response?.data);
@@ -348,7 +364,7 @@ export default function Checkout() {
 
   const subtotal = total;
   const platformFee = subtotal * 0.02; // 2% platform fee
-  const finalTotal = subtotal + (shippingCost || 0) + platformFee - discount;
+  const finalTotal = Math.max(0, subtotal + (shippingCost || 0) + platformFee - discount);
 
   return (
     <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 max-w-7xl">

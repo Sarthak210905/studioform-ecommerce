@@ -136,6 +136,16 @@ async def verify_payment(
             detail="Not authorized"
         )
     
+    # Idempotency guard: if already paid, return success without re-processing
+    if order.payment_status == "paid":
+        return {
+            "success": True,
+            "message": "Payment already verified",
+            "order_id": str(order.id),
+            "order_number": order.order_number,
+            "payment_status": order.payment_status
+        }
+    
     # Verify payment signature
     is_valid = verify_razorpay_payment(
         payment_data.razorpay_order_id,
@@ -180,6 +190,14 @@ async def verify_payment(
     except Exception as e:
         print(f"Error clearing cart: {e}")
     
+    # Mark coupon as used after successful payment
+    if order.coupon_code:
+        try:
+            from app.services.coupon import mark_coupon_used
+            await mark_coupon_used(order.coupon_code, str(current_user.id))
+        except Exception as e:
+            print(f"Error marking coupon as used: {e}")
+    
     # Send payment confirmation email
     await send_payment_confirmation_email(current_user.email, order)
     
@@ -222,12 +240,48 @@ async def razorpay_webhook(
         
         # Find and update order
         order = await Order.find_one(Order.order_number == order_receipt)
-        if order:
+        if order and order.payment_status != "paid":
             order.payment_status = "paid"
             order.payment_id = payment_id
             order.status = "processing"
             order.updated_at = datetime.utcnow()
             await order.save()
+            
+            # Deduct stock (same as verify-payment)
+            for order_item in order.items:
+                try:
+                    product = await Product.get(PydanticObjectId(order_item.product_id))
+                    if product:
+                        product.stock -= order_item.quantity
+                        await product.save()
+                except Exception as e:
+                    print(f"Webhook: Error updating stock for {order_item.product_id}: {e}")
+            
+            # Clear user's cart
+            try:
+                cart_items = await CartItem.find(
+                    CartItem.user_id == order.user_id
+                ).to_list()
+                for cart_item in cart_items:
+                    await cart_item.delete()
+            except Exception as e:
+                print(f"Webhook: Error clearing cart: {e}")
+            
+            # Send confirmation email
+            try:
+                user = await User.find_one(User.id == PydanticObjectId(order.user_id))
+                if user:
+                    await send_payment_confirmation_email(user.email, order)
+            except Exception as e:
+                print(f"Webhook: Error sending email: {e}")
+            
+            # Mark coupon as used
+            if order.coupon_code:
+                try:
+                    from app.services.coupon import mark_coupon_used
+                    await mark_coupon_used(order.coupon_code, order.user_id)
+                except Exception as e:
+                    print(f"Webhook: Error marking coupon: {e}")
     
     elif event == "payment.failed":
         # Payment failed

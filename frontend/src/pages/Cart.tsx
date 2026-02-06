@@ -29,8 +29,8 @@ export default function Cart() {
   // Safe access to cart values with defaults
   const totalPrice = cart?.total_price || 0;
   const totalItems = cart?.total_items || 0;
-  const shippingCost = totalPrice >= 1499 ? 0 : 150;
-  const finalTotal = totalPrice + shippingCost;
+  const estimatedShipping = totalPrice >= 1499 ? 0 : 150;
+  const estimatedTotal = totalPrice + estimatedShipping;
 
   if (items.length === 0) {
     return (
@@ -180,18 +180,21 @@ export default function Cart() {
                 </div>
                 
                 <div className="flex justify-between text-xs sm:text-sm">
-                  <span className="text-muted-foreground">Shipping</span>
-                  <span className={`font-medium ${shippingCost === 0 ? 'text-green-600' : ''}`}>
-                    {shippingCost === 0 ? 'FREE' : `₹${shippingCost}`}
+                  <span className="text-muted-foreground">Est. Shipping</span>
+                  <span className={`font-medium ${estimatedShipping === 0 ? 'text-green-600' : ''}`}>
+                    {estimatedShipping === 0 ? 'FREE' : `₹${estimatedShipping}`}
                   </span>
                 </div>
 
                 <Separator />
 
                 <div className="flex justify-between text-base sm:text-lg font-bold pt-1">
-                  <span>Total</span>
-                  <span>₹{finalTotal.toLocaleString()}</span>
+                  <span>Est. Total</span>
+                  <span>₹{estimatedTotal.toLocaleString()}</span>
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  Final total calculated at checkout (includes platform fee &amp; exact shipping).
+                </p>
               </div>
 
               <Button 

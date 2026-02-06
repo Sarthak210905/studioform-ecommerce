@@ -168,8 +168,8 @@ async def create_order(
     )
     await order.insert()
     
-    # Mark coupon as used
-    if coupon_code:
+    # Mark coupon as used only for COD (for Razorpay, coupon is marked after payment verification)
+    if coupon_code and order_data.payment_method == "cod":
         from app.services.coupon import mark_coupon_used
         await mark_coupon_used(coupon_code, str(current_user.id))
     
