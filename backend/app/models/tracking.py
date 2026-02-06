@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, List
 from beanie import Document
 from pydantic import Field
@@ -10,7 +10,7 @@ class RecentlyViewed(Document):
     product_name: str
     product_image: Optional[str] = None
     product_price: float
-    viewed_at: datetime = Field(default_factory=datetime.utcnow)
+    viewed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
     class Settings:
         name = "recently_viewed"
@@ -27,7 +27,7 @@ class PriceAlert(Document):
     alert_price: float  # Alert when price drops below this
     is_triggered: bool = False
     triggered_at: Optional[datetime] = None
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
     class Settings:
         name = "price_alerts"

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from beanie import Document
 from pydantic import Field, EmailStr
@@ -19,13 +19,14 @@ class User(Document):
     
     # Email verification
     verification_token: Optional[str] = None
+    verification_token_expires: Optional[datetime] = None
     
     # Password reset
     reset_token: Optional[str] = None
     reset_token_expires: Optional[datetime] = None
     
     # Timestamps
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     last_login: Optional[datetime] = None
     
     class Settings:

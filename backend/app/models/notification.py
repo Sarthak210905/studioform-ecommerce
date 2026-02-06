@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from beanie import Document
 from pydantic import Field
 from typing import Optional
@@ -10,7 +10,7 @@ class Notification(Document):
     message: str
     link: Optional[str] = None  # Link to order/product
     is_read: bool = False
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
     class Settings:
         name = "notifications"

@@ -50,8 +50,9 @@ export const authService = {
   },
 
   async resetPassword(token: string, newPassword: string): Promise<string> {
-    const { data } = await api.post<string>('/auth/reset-password', null, {
-      params: { token, new_password: newPassword },
+    const { data } = await api.post<string>('/auth/reset-password', {
+      token,
+      new_password: newPassword,
     });
     return data;
   },
@@ -63,7 +64,7 @@ export const authService = {
 
   async deleteAccount(password: string): Promise<string> {
     const { data } = await api.delete<string>('/auth/me', {
-      params: { password },
+      data: { password },
     });
     return data;
   },

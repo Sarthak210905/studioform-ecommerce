@@ -1,5 +1,5 @@
 from typing import List, Optional, Dict
-from datetime import datetime
+from datetime import datetime, timezone
 from beanie import Document, Indexed
 from pydantic import BaseModel, Field
 
@@ -55,8 +55,8 @@ class Product(Document):
     reviews_count: int = 0
     
     # Timestamps
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
     class Settings:
         name = "products"
@@ -107,7 +107,7 @@ class Product(Document):
         if not self.discount_active:
             return self.price
 
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         if self.discount_starts_at and now < self.discount_starts_at:
             return self.price
         if self.discount_ends_at and now > self.discount_ends_at:
@@ -174,11 +174,11 @@ class Product(Document):
     async def increment_views(self):
         """Increment product views"""
         self.views_count += 1
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(timezone.utc)
         await self.save()
     
     async def increment_sales(self, quantity: int = 1):
         """Increment sales count"""
         self.sales_count += quantity
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(timezone.utc)
         await self.save()

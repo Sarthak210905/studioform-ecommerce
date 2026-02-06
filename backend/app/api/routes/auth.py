@@ -1,8 +1,10 @@
-from datetime import timedelta, datetime
-from fastapi import APIRouter, Depends, HTTPException, status, Request, BackgroundTasks
+from datetime import timedelta, datetime, timezone
+from fastapi import APIRouter, Depends, HTTPException, status, Request, BackgroundTasks, Body
 from fastapi.security import OAuth2PasswordRequestForm
 from typing import Optional
 import secrets
+from html import escape as html_escape
+from pydantic import BaseModel, Field
 
 from app.core.config import settings
 from app.core.security import create_access_token, get_password_hash, verify_password
@@ -21,6 +23,14 @@ from slowapi.util import get_remote_address
 
 router = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
+
+# Request body models for sensitive operations
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str = Field(..., min_length=8, max_length=100)
+
+class DeleteAccountRequest(BaseModel):
+    password: str
 
 # ==================== REGISTRATION ====================
 
@@ -46,7 +56,7 @@ async def register(
             detail="Username already taken"
         )
     
-    # Generate verification token
+    # Generate verification token with expiry
     verification_token = secrets.token_urlsafe(32)
     
     # Create new user
@@ -56,7 +66,8 @@ async def register(
         full_name=user_in.full_name,
         hashed_password=get_password_hash(user_in.password),
         is_verified=False,
-        verification_token=verification_token
+        verification_token=verification_token,
+        verification_token_expires=datetime.now(timezone.utc) + timedelta(hours=24)
     )
     await user.insert()
     
@@ -132,6 +143,7 @@ async def resend_verification(
     # Generate new token
     verification_token = secrets.token_urlsafe(32)
     user.verification_token = verification_token
+    user.verification_token_expires = datetime.now(timezone.utc) + timedelta(hours=24)
     await user.save()
     
     # Send verification email
@@ -172,7 +184,7 @@ async def login(
     #     )
     
     # Update last login
-    user.last_login = datetime.utcnow()
+    user.last_login = datetime.now(timezone.utc)
     await user.save()
     
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -216,7 +228,7 @@ async def forgot_password(
     # Generate reset token
     reset_token = secrets.token_urlsafe(32)
     user.reset_token = reset_token
-    user.reset_token_expires = datetime.utcnow() + timedelta(hours=1)
+    user.reset_token_expires = datetime.now(timezone.utc) + timedelta(hours=1)
     await user.save()
     
     # Send reset email
@@ -231,10 +243,10 @@ async def forgot_password(
     return {"message": "Password reset link sent to your email"}
 
 @router.post("/reset-password")
-async def reset_password(token: str, new_password: str):
+async def reset_password(body: ResetPasswordRequest):
     """Reset password with token"""
     
-    user = await User.find_one(User.reset_token == token)
+    user = await User.find_one(User.reset_token == body.token)
     
     if not user:
         raise HTTPException(
@@ -243,14 +255,14 @@ async def reset_password(token: str, new_password: str):
         )
     
     # Check if token is expired
-    if user.reset_token_expires < datetime.utcnow():
+    if user.reset_token_expires < datetime.now(timezone.utc):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Reset token has expired"
         )
     
     # Update password
-    user.hashed_password = get_password_hash(new_password)
+    user.hashed_password = get_password_hash(body.new_password)
     user.reset_token = None
     user.reset_token_expires = None
     await user.save()
@@ -330,13 +342,13 @@ async def change_password(
 
 @router.delete("/me")
 async def delete_account(
-    password: str,
+    body: DeleteAccountRequest,
     current_user: User = Depends(get_current_active_user)
 ):
     """Delete user account"""
     
     # Verify password
-    if not verify_password(password, current_user.hashed_password):
+    if not verify_password(body.password, current_user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Incorrect password"
@@ -355,10 +367,11 @@ async def delete_account(
 
 async def send_verification_email(to_email: str, full_name: str, verification_link: str):
     """Send email verification link"""
-    subject = "Verify Your Email - Premium Desktop Accessories"
+    safe_name = html_escape(full_name)
+    subject = "Verify Your Email - StudioForm"
     body = f"""
-    <h2>Welcome, {full_name}!</h2>
-    <p>Thank you for registering at Premium Desktop Accessories.</p>
+    <h2>Welcome, {safe_name}!</h2>
+    <p>Thank you for registering at StudioForm.</p>
     <p>Please verify your email address by clicking the link below:</p>
     <p>
         <a href="{verification_link}" 
@@ -377,9 +390,10 @@ async def send_verification_email(to_email: str, full_name: str, verification_li
 
 async def send_password_reset_email(to_email: str, full_name: str, reset_link: str):
     """Send password reset link"""
-    subject = "Reset Your Password - Premium Desktop Accessories"
+    safe_name = html_escape(full_name)
+    subject = "Reset Your Password - StudioForm"
     body = f"""
-    <h2>Hello, {full_name}</h2>
+    <h2>Hello, {safe_name}</h2>
     <p>We received a request to reset your password.</p>
     <p>Click the link below to reset your password:</p>
     <p>

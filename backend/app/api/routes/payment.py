@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Header
 from beanie import PydanticObjectId
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from app.models.order import Order
@@ -17,11 +17,16 @@ from app.services.razorpay_service import (
     create_refund
 )
 from app.services.email import send_email
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 router = APIRouter()
+limiter = Limiter(key_func=get_remote_address)
 
 @router.post("/create-order", response_model=RazorpayOrderResponse)
+@limiter.limit("10/minute")
 async def create_payment_order(
+    request: Request,
     payment_data: CreateRazorpayOrder,
     current_user: User = Depends(get_current_active_user)
 ):
@@ -107,7 +112,9 @@ async def create_payment_order(
     )
 
 @router.post("/verify-payment")
+@limiter.limit("10/minute")
 async def verify_payment(
+    request: Request,
     payment_data: VerifyPayment,
     current_user: User = Depends(get_current_active_user)
 ):
@@ -163,20 +170,40 @@ async def verify_payment(
             detail="Invalid payment signature"
         )
     
-    # Payment verified - update order
-    order.payment_status = "paid"
-    order.payment_id = payment_data.razorpay_payment_id
-    order.status = "processing"
-    order.updated_at = datetime.utcnow()
-    await order.save()
+    # Payment verified - atomically update order to prevent double processing
+    from motor.motor_asyncio import AsyncIOMotorCollection
+    order_collection = Order.get_motor_collection()
+    result = await order_collection.find_one_and_update(
+        {"_id": order.id, "payment_status": {"$ne": "paid"}},
+        {"$set": {
+            "payment_status": "paid",
+            "payment_id": payment_data.razorpay_payment_id,
+            "status": "processing",
+            "updated_at": datetime.now(timezone.utc)
+        }}
+    )
     
-    # Update product stock
+    if not result:
+        # Another handler already processed this - return success (idempotent)
+        return {
+            "success": True,
+            "message": "Payment already verified",
+            "order_id": str(order.id),
+            "order_number": order.order_number,
+            "payment_status": "paid"
+        }
+    
+    # Reload order after atomic update
+    order = await Order.get(order.id)
+    
+    # Update product stock atomically
+    product_collection = Product.get_motor_collection()
     for order_item in order.items:
         try:
-            product = await Product.get(PydanticObjectId(order_item.product_id))
-            if product:
-                product.stock -= order_item.quantity
-                await product.save()
+            await product_collection.update_one(
+                {"_id": PydanticObjectId(order_item.product_id), "stock": {"$gte": order_item.quantity}},
+                {"$inc": {"stock": -order_item.quantity, "sales_count": order_item.quantity}}
+            )
         except Exception as e:
             print(f"Error updating stock for product {order_item.product_id}: {e}")
     
@@ -238,50 +265,57 @@ async def razorpay_webhook(
         order_receipt = payment_entity.get("notes", {}).get("order_id")
         payment_id = payment_entity.get("id")
         
-        # Find and update order
+        # Find and update order atomically
         order = await Order.find_one(Order.order_number == order_receipt)
-        if order and order.payment_status != "paid":
-            order.payment_status = "paid"
-            order.payment_id = payment_id
-            order.status = "processing"
-            order.updated_at = datetime.utcnow()
-            await order.save()
+        if order:
+            order_collection = Order.get_motor_collection()
+            result = await order_collection.find_one_and_update(
+                {"_id": order.id, "payment_status": {"$ne": "paid"}},
+                {"$set": {
+                    "payment_status": "paid",
+                    "payment_id": payment_id,
+                    "status": "processing",
+                    "updated_at": datetime.now(timezone.utc)
+                }}
+            )
             
-            # Deduct stock (same as verify-payment)
-            for order_item in order.items:
+            if result:
+                # We won the race - do stock/cart/email/coupon
+                product_collection = Product.get_motor_collection()
+                for order_item in order.items:
+                    try:
+                        await product_collection.update_one(
+                            {"_id": PydanticObjectId(order_item.product_id), "stock": {"$gte": order_item.quantity}},
+                            {"$inc": {"stock": -order_item.quantity, "sales_count": order_item.quantity}}
+                        )
+                    except Exception as e:
+                        print(f"Webhook: Error updating stock for {order_item.product_id}: {e}")
+            
+                # Clear user's cart
                 try:
-                    product = await Product.get(PydanticObjectId(order_item.product_id))
-                    if product:
-                        product.stock -= order_item.quantity
-                        await product.save()
+                    cart_items = await CartItem.find(
+                        CartItem.user_id == order.user_id
+                    ).to_list()
+                    for cart_item in cart_items:
+                        await cart_item.delete()
                 except Exception as e:
-                    print(f"Webhook: Error updating stock for {order_item.product_id}: {e}")
-            
-            # Clear user's cart
-            try:
-                cart_items = await CartItem.find(
-                    CartItem.user_id == order.user_id
-                ).to_list()
-                for cart_item in cart_items:
-                    await cart_item.delete()
-            except Exception as e:
-                print(f"Webhook: Error clearing cart: {e}")
-            
-            # Send confirmation email
-            try:
-                user = await User.find_one(User.id == PydanticObjectId(order.user_id))
-                if user:
-                    await send_payment_confirmation_email(user.email, order)
-            except Exception as e:
-                print(f"Webhook: Error sending email: {e}")
-            
-            # Mark coupon as used
-            if order.coupon_code:
+                    print(f"Webhook: Error clearing cart: {e}")
+                
+                # Send confirmation email
                 try:
-                    from app.services.coupon import mark_coupon_used
-                    await mark_coupon_used(order.coupon_code, order.user_id)
+                    user = await User.find_one(User.id == PydanticObjectId(order.user_id))
+                    if user:
+                        await send_payment_confirmation_email(user.email, order)
                 except Exception as e:
-                    print(f"Webhook: Error marking coupon: {e}")
+                    print(f"Webhook: Error sending email: {e}")
+                
+                # Mark coupon as used
+                if order.coupon_code:
+                    try:
+                        from app.services.coupon import mark_coupon_used
+                        await mark_coupon_used(order.coupon_code, order.user_id)
+                    except Exception as e:
+                        print(f"Webhook: Error marking coupon: {e}")
     
     elif event == "payment.failed":
         # Payment failed
@@ -290,13 +324,15 @@ async def razorpay_webhook(
         order = await Order.find_one(Order.order_number == order_receipt)
         if order:
             order.payment_status = "failed"
-            order.updated_at = datetime.utcnow()
+            order.updated_at = datetime.now(timezone.utc)
             await order.save()
     
     return {"status": "ok"}
 
 @router.post("/refund/{order_id}")
+@limiter.limit("5/minute")
 async def initiate_refund(
+    request: Request,
     order_id: str,
     amount: Optional[float] = None,
     current_user: User = Depends(get_current_active_user)
@@ -352,7 +388,7 @@ async def initiate_refund(
     # Update order
     order.payment_status = "refunded"
     order.status = "cancelled"
-    order.updated_at = datetime.utcnow()
+    order.updated_at = datetime.now(timezone.utc)
     await order.save()
     
     return {

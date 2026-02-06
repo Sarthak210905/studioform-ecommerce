@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from beanie import Document
 from pydantic import Field
 from typing import Optional
@@ -6,10 +6,10 @@ from typing import Optional
 class WishlistItem(Document):
     user_id: str
     product_id: str
-    product_name: str
-    product_price: float
+    product_name: Optional[str] = None
+    product_price: Optional[float] = None
     image_url: Optional[str] = None
-    added_at: datetime = Field(default_factory=datetime.utcnow)
+    added_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
     # Price tracking for alerts
     last_known_price: Optional[float] = None

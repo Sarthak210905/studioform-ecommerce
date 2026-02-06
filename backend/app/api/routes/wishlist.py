@@ -36,7 +36,7 @@ async def get_wishlist(current_user: User = Depends(get_current_active_user)):
                     in_stock=product.is_in_stock,
                     added_at=item.added_at
                 ))
-        except:
+        except Exception:
             # Product deleted, skip
             continue
     

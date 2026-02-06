@@ -1,10 +1,12 @@
 import aiosmtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from html import escape as html_escape
+import asyncio
 from app.core.config import settings
 
 async def send_email(to_email: str, subject: str, body: str):
-    """Send email using Gmail SMTP"""
+    """Send email using Gmail SMTP with timeout and retry"""
     
     message = MIMEMultipart("alternative")
     message["Subject"] = subject
@@ -16,7 +18,7 @@ async def send_email(to_email: str, subject: str, body: str):
     <html>
       <body style="font-family: Arial, sans-serif; padding: 20px;">
         <div style="max-width: 600px; margin: 0 auto; background: #f9f9f9; padding: 30px; border-radius: 10px;">
-          <h2 style="color: #333;">Premium Desktop Accessories</h2>
+          <h2 style="color: #333;">StudioForm</h2>
           {body}
           <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
           <p style="color: #777; font-size: 12px;">
@@ -30,19 +32,34 @@ async def send_email(to_email: str, subject: str, body: str):
     part = MIMEText(html_body, "html")
     message.attach(part)
     
-    try:
-        await aiosmtplib.send(
-            message,
-            hostname=settings.SMTP_HOST,
-            port=settings.SMTP_PORT,
-            username=settings.SMTP_USER,
-            password=settings.SMTP_PASSWORD,
-            start_tls=True
-        )
-        return True
-    except Exception as e:
-        print(f"Failed to send email: {e}")
-        return False
+    # Try with retries and different TLS modes
+    for attempt in range(3):
+        try:
+            await aiosmtplib.send(
+                message,
+                hostname=settings.SMTP_HOST,
+                port=settings.SMTP_PORT,
+                username=settings.SMTP_USER,
+                password=settings.SMTP_PASSWORD,
+                start_tls=True,
+                timeout=30,  # 30 second timeout per connection attempt
+            )
+            return True
+        except asyncio.TimeoutError:
+            print(f"Email send attempt {attempt + 1}/3 timed out for {to_email}")
+            if attempt < 2:
+                await asyncio.sleep(2 ** attempt)  # Exponential backoff
+        except aiosmtplib.SMTPConnectError as e:
+            print(f"SMTP connect error (attempt {attempt + 1}/3): {e}")
+            if attempt < 2:
+                await asyncio.sleep(2 ** attempt)
+        except Exception as e:
+            print(f"Failed to send email (attempt {attempt + 1}/3): {e}")
+            if attempt < 2:
+                await asyncio.sleep(1)
+    
+    print(f"Failed to send email to {to_email} after 3 attempts")
+    return False
 
 async def send_otp_email(to_email: str, otp_code: str):
     """Send OTP email for password reset"""

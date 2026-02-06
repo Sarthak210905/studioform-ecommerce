@@ -120,7 +120,7 @@ export default function Cart() {
                             onClick={() => handleUpdateQuantity(item.product_id, item.quantity + 1)}
                             disabled={item.quantity >= (item.stock_quantity || 0)}
                           >
-                            <Plus className="h-3 w:h-3 sm:h-4 sm:w-4" />
+                            <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
                           </Button>
                         </div>
 

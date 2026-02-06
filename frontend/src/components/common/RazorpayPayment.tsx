@@ -87,7 +87,7 @@ export default function RazorpayPayment({
       }
 
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_Rx1amIQ75nnrH6',
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: Math.round(amount * 100),
         currency: 'INR',
         name: 'Studioform',

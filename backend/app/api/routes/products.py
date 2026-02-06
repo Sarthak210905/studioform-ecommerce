@@ -171,8 +171,8 @@ async def get_featured_products(limit: int = 8):
 async def get_categories():
     """Get all product categories"""
     
-    products = await Product.find(Product.is_active == True).to_list()
-    categories = list(set(p.category for p in products if p.category))
+    collection = Product.get_motor_collection()
+    categories = await collection.distinct("category", {"is_active": True, "category": {"$ne": None}})
     
     return {"categories": sorted(categories)}
 
@@ -180,8 +180,8 @@ async def get_categories():
 async def get_brands():
     """Get all product brands"""
     
-    products = await Product.find(Product.is_active == True).to_list()
-    brands = list(set(p.brand for p in products if p.brand))
+    collection = Product.get_motor_collection()
+    brands = await collection.distinct("brand", {"is_active": True, "brand": {"$ne": None}})
     
     return {"brands": sorted(brands)}
 
@@ -256,7 +256,7 @@ async def get_related_products(product_id: str, limit: int = 6):
             related = await Product.get(PydanticObjectId(related_id))
             if related and related.is_active:
                 related_products.append(related)
-        except:
+        except Exception:
             continue
     
     # If no manual related products, find by category
@@ -388,7 +388,7 @@ async def get_recently_viewed(
                         updated_at=product.updated_at
                     ).dict()
                 )
-        except:
+        except Exception:
             continue
     
     return {"recently_viewed": products}

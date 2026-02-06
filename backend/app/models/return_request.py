@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from beanie import Document
 from pydantic import Field
 from typing import Optional, List
@@ -17,8 +17,8 @@ class ReturnRequest(Document):
     admin_notes: Optional[str] = None
     refund_amount: Optional[float] = None
     
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
     class Settings:
         name = "return_requests"
