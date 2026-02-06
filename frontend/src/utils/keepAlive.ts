@@ -2,8 +2,18 @@ import { api } from '@/lib/axios';
 
 const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 const PING_INTERVAL = 4 * 60 * 1000; // Ping every 4 minutes to prevent Render spin-down (free tier sleeps after ~15 min)
+const CRITICAL_PING_INTERVAL = 20 * 1000; // Aggressive 20s ping during critical operations
 
 let pingInterval: ReturnType<typeof setInterval> | null = null;
+let lastActivityTime = Date.now();
+let isPageVisible = true;
+
+// Track page visibility to pause pings when tab is hidden
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', () => {
+    isPageVisible = !document.hidden;
+  });
+}
 
 /**
  * Ping the backend /health endpoint to keep the Render free-tier instance awake.
@@ -11,8 +21,9 @@ let pingInterval: ReturnType<typeof setInterval> | null = null;
  */
 export async function pingBackend(): Promise<boolean> {
   try {
+    // Use HEAD request for minimal bandwidth
     await fetch(`${BACKEND_URL}/health`, {
-      method: 'GET',
+      method: 'HEAD',
       signal: AbortSignal.timeout(10000),
     });
     return true;
@@ -68,12 +79,31 @@ export async function resilientApiCall<T>(
 
 /**
  * Start periodic keep-alive pings. Call once when the app mounts.
+ * Only pings when page is visible and there's been recent activity.
  */
 export function startKeepAlive() {
   if (pingInterval) return;
+  
   // Initial ping
   pingBackend();
-  pingInterval = setInterval(pingBackend, PING_INTERVAL);
+  
+  pingInterval = setInterval(() => {
+    // Only ping if page is visible and there's been activity in last 10 minutes
+    const timeSinceActivity = Date.now() - lastActivityTime;
+    const isActive = timeSinceActivity < 10 * 60 * 1000;
+    
+    if (isPageVisible && isActive) {
+      pingBackend();
+    }
+  }, PING_INTERVAL);
+  
+  // Track user activity to avoid pinging inactive tabs
+  const activityEvents = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+  const updateActivity = () => { lastActivityTime = Date.now(); };
+  
+  activityEvents.forEach(event => {
+    document.addEventListener(event, updateActivity, { passive: true });
+  });
 }
 
 /**
@@ -84,4 +114,30 @@ export function stopKeepAlive() {
     clearInterval(pingInterval);
     pingInterval = null;
   }
+}
+
+/**
+ * Start aggressive keep-alive for critical operations (checkout, payment).
+ * Returns a function to stop the aggressive pinging.
+ */
+export function startCriticalKeepAlive(): () => void {
+  let criticalInterval: ReturnType<typeof setInterval> | null = null;
+  
+  // Immediate ping
+  pingBackend();
+  
+  // Aggressive pinging every 20 seconds
+  criticalInterval = setInterval(() => {
+    if (isPageVisible) {
+      pingBackend();
+    }
+  }, CRITICAL_PING_INTERVAL);
+  
+  // Return cleanup function
+  return () => {
+    if (criticalInterval) {
+      clearInterval(criticalInterval);
+      criticalInterval = null;
+    }
+  };
 }

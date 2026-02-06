@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
 import { api } from '@/lib/axios';
-import { wakeUpBackend } from '@/utils/keepAlive';
+import { wakeUpBackend, startCriticalKeepAlive } from '@/utils/keepAlive';
 import { Loader2, CreditCard, Truck, MapPin, Package, ShieldCheck } from 'lucide-react';
 import RazorpayPayment from '@/components/common/RazorpayPayment';
 import shippingService from '@/services/shipping.service';
@@ -78,7 +78,15 @@ export default function Checkout() {
       navigate('/cart');
       return;
     }
+    
+    // Start aggressive keep-alive during checkout
+    const stopCriticalPing = startCriticalKeepAlive();
+    
     loadAddresses();
+    
+    return () => {
+      stopCriticalPing();
+    };
   }, []);
   
   // Recalculate shipping when address or payment method changes
