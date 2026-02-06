@@ -1,5 +1,3 @@
-import { api } from '@/lib/axios';
-
 const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 const PING_INTERVAL = 4 * 60 * 1000; // Ping every 4 minutes to prevent Render spin-down (free tier sleeps after ~15 min)
 const CRITICAL_PING_INTERVAL = 20 * 1000; // Aggressive 20s ping during critical operations
