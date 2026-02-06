@@ -30,6 +30,7 @@ export default function RazorpayPayment({
 }: RazorpayPaymentProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
+  const [verifying, setVerifying] = useState(false);
 
   useEffect(() => {
     // Start aggressive keep-alive for payment flow (20s intervals)
@@ -94,6 +95,9 @@ export default function RazorpayPayment({
         order_id: razorpay_order_id,
         handler: async (response: any) => {
           try {
+            // Show verification screen
+            setVerifying(true);
+            
             // Verify payment on backend with extended timeout and retries
             const verifyResponse = await resilientApiCall(() =>
               api.post(
@@ -112,6 +116,7 @@ export default function RazorpayPayment({
               // Payment verified successfully - call success handler
               onSuccess(response.razorpay_payment_id);
             } else {
+              setVerifying(false);
               onFailure('Payment verification failed');
               toast({
                 title: 'Payment Verification Failed',
@@ -121,6 +126,7 @@ export default function RazorpayPayment({
             }
           } catch (error: any) {
             console.error('Payment verification error:', error);
+            setVerifying(false);
             onFailure(error.response?.data?.detail || 'Payment verification failed');
             toast({
               title: 'Payment Verification Failed',
@@ -172,6 +178,31 @@ export default function RazorpayPayment({
       });
     }
   };
+
+  // Show verification screen while verifying payment
+  if (verifying) {
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-8 max-w-md mx-4 text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 mb-4">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-r-transparent" />
+          </div>
+          <h3 className="text-xl font-semibold mb-2">Verifying Payment</h3>
+          <p className="text-muted-foreground mb-4">
+            Please wait while we confirm your payment with the bank...
+          </p>
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <div className="h-2 w-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+            <div className="h-2 w-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+            <div className="h-2 w-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          </div>
+          <p className="text-xs text-muted-foreground mt-4">
+            This may take up to 60 seconds. Please do not close this window.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
