@@ -6,7 +6,7 @@ import NewsletterSignup from '@/components/common/NewsletterSignup';
 
 export default function Footer() {
   return (
-    <footer className="border-t bg-gradient-to-b from-muted/30 to-muted/60 mt-20 p-4">
+    <footer className="border-t bg-gradient-to-b from-muted/30 to-muted/60  p-4">
       <div className="container py-16 sm:py-20">
         {/* Trust Badges */}
         <div className="mb-12">

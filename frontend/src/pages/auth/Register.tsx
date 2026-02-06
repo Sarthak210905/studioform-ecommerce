@@ -3,11 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/axios';
-import { Loader2, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Eye, EyeOff, ArrowRight } from 'lucide-react';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -38,7 +37,6 @@ export default function Register() {
     const { id, value } = e.target;
     setFormData({ ...formData, [id]: value });
     
-    // Clear error when user types
     if (errors[id as keyof typeof errors]) {
       setErrors({ ...errors, [id]: '' });
     }
@@ -53,28 +51,23 @@ export default function Register() {
       confirmPassword: '',
     };
 
-    // Username validation
     if (formData.username.trim().length < 3) {
       newErrors.username = 'Username must be at least 3 characters';
     }
 
-    // Full name validation
     if (formData.full_name.trim().length < 2) {
       newErrors.full_name = 'Full name must be at least 2 characters';
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       newErrors.email = 'Please enter a valid email';
     }
 
-    // Password validation
     if (formData.password.length < 8) {
       newErrors.password = 'Password must be at least 8 characters';
     }
 
-    // Confirm password validation
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
@@ -102,33 +95,26 @@ export default function Register() {
     setLoading(true);
 
     try {
-      // Call the API to register - match backend UserCreate schema
       await api.post('/auth/register', {
         username: formData.username,
         email: formData.email,
         full_name: formData.full_name,
         password: formData.password,
       });
-
-      // Note: Backend returns UserResponse, not token on registration
-      // You might need to login after registration or handle differently
       
       toast({
         title: 'Account Created!',
         description: 'Please check your email to verify your account.',
       });
 
-      // Redirect to login page
       navigate('/login');
     } catch (error: any) {
       console.error('Registration error:', error);
       
-      // Handle validation errors from server (422)
       if (error.response?.status === 422) {
         const validationErrors = error.response.data.detail;
         
         if (Array.isArray(validationErrors)) {
-          // FastAPI validation errors format
           const errorMessages = validationErrors.map((err: any) => {
             const field = err.loc?.[1] || 'field';
             return `${field}: ${err.msg}`;
@@ -153,14 +139,12 @@ export default function Register() {
           });
         }
       } else if (error.response?.status === 400) {
-        // Bad request - duplicate email/username
         toast({
           title: 'Registration Failed',
           description: error.response.data.detail || 'Email or username already exists',
           variant: 'destructive',
         });
       } else {
-        // Handle other errors
         const errorMessage = error.response?.data?.message 
           || error.response?.data?.detail 
           || error.message 
@@ -178,33 +162,41 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-muted/30">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Create Account</CardTitle>
-          <CardDescription className="text-center">
-            Enter your details to create your account
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="min-h-screen flex">
+      {/* Left Side - Image */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white dark:bg-slate-950">
+        <div className="w-full max-w-md space-y-8">
+          {/* Mobile Logo */}
+          <div className="lg:hidden text-center mb-8">
+            <Link to="/" className="text-2xl font-bold">
+              YourBrand
+            </Link>
+          </div>
+
+          {/* Header */}
+          <div className="space-y-2">
+            <h2 className="text-3xl font-bold tracking-tight">Create account</h2>
+            <p className="text-muted-foreground">
+              Enter your details to get started
+            </p>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Username */}
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="johndoe"
-                  className="pl-10"
-                  value={formData.username}
-                  onChange={handleChange}
-                  required
-                  disabled={loading}
-                  autoComplete="username"
-                />
-              </div>
+              <Input
+                id="username"
+                type="text"
+                placeholder="johndoe"
+                className="h-11"
+                value={formData.username}
+                onChange={handleChange}
+                required
+                disabled={loading}
+                autoComplete="username"
+              />
               {errors.username && (
                 <p className="text-sm text-destructive">{errors.username}</p>
               )}
@@ -213,20 +205,17 @@ export default function Register() {
             {/* Full Name */}
             <div className="space-y-2">
               <Label htmlFor="full_name">Full Name</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="full_name"
-                  type="text"
-                  placeholder="John Doe"
-                  className="pl-10"
-                  value={formData.full_name}
-                  onChange={handleChange}
-                  required
-                  disabled={loading}
-                  autoComplete="name"
-                />
-              </div>
+              <Input
+                id="full_name"
+                type="text"
+                placeholder="John Doe"
+                className="h-11"
+                value={formData.full_name}
+                onChange={handleChange}
+                required
+                disabled={loading}
+                autoComplete="name"
+              />
               {errors.full_name && (
                 <p className="text-sm text-destructive">{errors.full_name}</p>
               )}
@@ -235,20 +224,17 @@ export default function Register() {
             {/* Email */}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  className="pl-10"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  disabled={loading}
-                  autoComplete="email"
-                />
-              </div>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                className="h-11"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                disabled={loading}
+                autoComplete="email"
+              />
               {errors.email && (
                 <p className="text-sm text-destructive">{errors.email}</p>
               )}
@@ -258,12 +244,11 @@ export default function Register() {
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  className="pl-10 pr-10"
+                  placeholder="Create a password"
+                  className="h-11 pr-10"
                   value={formData.password}
                   onChange={handleChange}
                   required
@@ -273,7 +258,8 @@ export default function Register() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  tabIndex={-1}
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -285,21 +271,22 @@ export default function Register() {
               {errors.password && (
                 <p className="text-sm text-destructive">{errors.password}</p>
               )}
-              <p className="text-xs text-muted-foreground">
-                Must be at least 8 characters long
-              </p>
+              {!errors.password && (
+                <p className="text-xs text-muted-foreground">
+                  Must be at least 8 characters
+                </p>
+              )}
             </div>
 
             {/* Confirm Password */}
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm Password</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  className="pl-10 pr-10"
+                  placeholder="Confirm your password"
+                  className="h-11 pr-10"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   required
@@ -309,7 +296,8 @@ export default function Register() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  tabIndex={-1}
                 >
                   {showConfirmPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -330,10 +318,11 @@ export default function Register() {
                 checked={agreedToTerms}
                 onCheckedChange={(checked: boolean) => setAgreedToTerms(checked)}
                 disabled={loading}
+                className="mt-1"
               />
               <label
                 htmlFor="terms"
-                className="text-sm text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                className="text-sm text-muted-foreground leading-relaxed cursor-pointer"
               >
                 I agree to the{' '}
                 <Link to="/terms" className="text-primary hover:underline">
@@ -347,42 +336,86 @@ export default function Register() {
             </div>
 
             {/* Submit Button */}
-            <Button type="submit" className="w-full" size="lg" disabled={loading}>
+            <Button 
+              type="submit" 
+              className="w-full h-11 group" 
+              disabled={loading}
+            >
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Creating account...
                 </>
               ) : (
-                'Create Account'
+                <>
+                  Create account
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </>
               )}
             </Button>
           </form>
 
           {/* Divider */}
-          <div className="relative my-6">
+          <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">
-                Already have an account?
+              <span className="bg-white dark:bg-slate-950 px-2 text-muted-foreground">
+                Or
               </span>
             </div>
           </div>
 
           {/* Login Link */}
-          <Button
-            variant="outline"
-            className="w-full"
-            size="lg"
-            asChild
-            disabled={loading}
-          >
-            <Link to="/login">Log In</Link>
-          </Button>
-        </CardContent>
-      </Card>
+          <div className="text-center text-sm">
+            <span className="text-muted-foreground">Already have an account? </span>
+            <Link 
+              to="/login" 
+              className="font-medium text-primary hover:underline"
+            >
+              Sign in
+            </Link>
+          </div>
+        </div>
+      </div>
+      
+
+      {/* Right Side - Register Form */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover  opacity-60"
+          style={{
+            backgroundImage: "url('https://lh3.googleusercontent.com/sitesv/APaQ0STZcxSbrVWDnZSef90T92_6tYWbGUoBGnFxrfEJ1yK6pluhTpAJAVKPb1NILN6qLPSlxTl47gBHgPudTMJq4lWwoaial7crRWHs1eHaZLWUangyhTwKvfIkTLm2MRUTib-6hd_fFhdQqjboW8qv93_VXoEsF_m6dJcEQ3pqzzp5j1aVrZkrfesS=w16383')"
+          }}
+        />
+        
+        {/* Overlay Content */}
+        <div className="relative z-10 flex flex-col justify-between p-12 text-white w-full">
+          {/* Logo/Brand */}
+          <div>
+            <Link to="/" className="text-2xl font-bold tracking-tight">
+              Studioform
+            </Link>
+          </div>
+
+          {/* Center Content */}
+          <div className="space-y-6">
+            <h1 className="text-5xl font-bold leading-tight">
+              Start your journey<br />with us today
+            </h1>
+            <p className="text-lg text-gray-300 max-w-md">
+              Join thousands of happy customers and experience shopping like never before.
+            </p>
+          </div>
+
+          {/* Footer */}
+          <div className="text-sm text-gray-400">
+            
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

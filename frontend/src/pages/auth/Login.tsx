@@ -109,9 +109,9 @@ export default function Login() {
       <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         {/* Background Image */}
         <div 
-          className="absolute inset-0 bg-cover bg-center opacity-20"
+          className="absolute inset-0 bg-cover bg-center opacity-50"
           style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&auto=format&fit=crop')"
+            backgroundImage: "url('https://lh3.googleusercontent.com/sitesv/APaQ0STny5nrZUeq6Fjt-k0Ss05Yp7oUg7U9XL8fWXOhm5LEmkhkJyDDTH5RH9BJG_qEVVIlSi0vo0SL31myU1__OV-QAh7zJTDZwx4s0SIw4QZe75-GDUqf-yAfqzG263YOCDcg6CPILl1r_J1fwhL9OQQ149viwN4EJEnYHRuEBQVPyXemhi0gMiPmT9I=w16383')"
           }}
         />
         
@@ -120,14 +120,14 @@ export default function Login() {
           {/* Logo/Brand */}
           <div>
             <Link to="/" className="text-2xl font-bold tracking-tight">
-              YourBrand
+              Studioform
             </Link>
           </div>
 
           {/* Center Content */}
           <div className="space-y-6">
             <h1 className="text-5xl font-bold leading-tight">
-              Welcome back to<br />your favorite store
+              Welcome back to<br />Studioform
             </h1>
             <p className="text-lg text-gray-300 max-w-md">
               Discover amazing products and exclusive deals tailored just for you.
@@ -136,7 +136,7 @@ export default function Login() {
 
           {/* Footer */}
           <div className="text-sm text-gray-400">
-            © 2024 YourBrand. All rights reserved.
+            
           </div>
         </div>
       </div>
