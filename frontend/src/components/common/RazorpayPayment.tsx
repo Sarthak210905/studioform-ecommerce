@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/axios';
-import { resilientApiCall, startCriticalKeepAlive } from '@/utils/keepAlive';
+import { resilientApiCall, startCriticalKeepAlive, wakeUpBackend, pingBackend } from '@/utils/keepAlive';
 
 interface RazorpayPaymentProps {
   orderId: string;
@@ -98,6 +98,13 @@ export default function RazorpayPayment({
             // Show verification screen
             setVerifying(true);
             
+            // Ensure backend is awake before verification (user may have spent minutes in Razorpay modal)
+            const isAlive = await pingBackend();
+            if (!isAlive) {
+              console.log('Backend asleep after payment, waking up for verification...');
+              await wakeUpBackend(8); // Up to ~40s for full cold start
+            }
+            
             // Verify payment on backend with extended timeout and retries
             const verifyResponse = await resilientApiCall(() =>
               api.post(
@@ -108,8 +115,10 @@ export default function RazorpayPayment({
                   razorpay_payment_id: response.razorpay_payment_id,
                   razorpay_signature: response.razorpay_signature,
                 },
-                { timeout: 60000 } // 60s timeout for payment verification
-              )
+                { timeout: 90000 } // 90s timeout for payment verification after cold start
+              ),
+              4, // 4 retries for payment-critical operation
+              3000,
             );
 
             if (verifyResponse.data.success) {
@@ -127,12 +136,31 @@ export default function RazorpayPayment({
           } catch (error: any) {
             console.error('Payment verification error:', error);
             setVerifying(false);
-            onFailure(error.response?.data?.detail || 'Payment verification failed');
-            toast({
-              title: 'Payment Verification Failed',
-              description: error.response?.data?.detail || 'Failed to verify payment',
-              variant: 'destructive',
-            });
+            
+            // Check if this is a timeout/network issue (payment may have actually succeeded at Razorpay)
+            const isNetworkIssue =
+              error.code === 'ECONNABORTED' ||
+              error.message?.includes('timeout') ||
+              error.message?.includes('Network Error') ||
+              !error.response;
+            
+            if (isNetworkIssue) {
+              // Payment was captured by Razorpay — only backend verification timed out
+              onFailure('Payment was processed but verification timed out. Your order will be confirmed shortly — please check your email.');
+              toast({
+                title: 'Verification Delayed',
+                description: 'Your payment was received. We\'re confirming it — check your email or contact support if not confirmed in 10 minutes.',
+                variant: 'default',
+                duration: 15000,
+              });
+            } else {
+              onFailure(error.response?.data?.detail || 'Payment verification failed');
+              toast({
+                title: 'Payment Verification Failed',
+                description: error.response?.data?.detail || 'Failed to verify payment. Contact support with your payment ID.',
+                variant: 'destructive',
+              });
+            }
           }
         },
         prefill: {
@@ -197,7 +225,7 @@ export default function RazorpayPayment({
             <div className="h-2 w-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
           </div>
           <p className="text-xs text-muted-foreground mt-4">
-            This may take up to 60 seconds. Please do not close this window.
+            This may take up to 90 seconds. Please do not close this window.
           </p>
         </div>
       </div>

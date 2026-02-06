@@ -1,6 +1,6 @@
 const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 const PING_INTERVAL = 4 * 60 * 1000; // Ping every 4 minutes to prevent Render spin-down (free tier sleeps after ~15 min)
-const CRITICAL_PING_INTERVAL = 20 * 1000; // Aggressive 20s ping during critical operations
+const CRITICAL_PING_INTERVAL = 10 * 1000; // Aggressive 10s ping during critical operations
 
 let pingInterval: ReturnType<typeof setInterval> | null = null;
 let lastActivityTime = Date.now();
@@ -51,8 +51,15 @@ export async function wakeUpBackend(maxAttempts = 6): Promise<boolean> {
 export async function resilientApiCall<T>(
   fn: () => Promise<T>,
   retries = 3,
-  delayMs = 5000,
+  delayMs = 3000,
 ): Promise<T> {
+  // Pre-wake: ensure backend is alive before the first attempt
+  const awake = await pingBackend();
+  if (!awake) {
+    console.log('Backend appears asleep, waking up before request...');
+    await wakeUpBackend(8); // up to ~40s for full cold start
+  }
+
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
       return await fn();
@@ -61,11 +68,13 @@ export async function resilientApiCall<T>(
         error.code === 'ECONNABORTED' ||
         error.message?.includes('timeout') ||
         error.message?.includes('Network Error');
+      const isCorsError = error.message?.includes('Network Error') && !error.response;
       const isServerError = error.response?.status >= 500;
 
-      if ((isTimeout || isServerError) && attempt < retries) {
+      if ((isTimeout || isServerError || isCorsError) && attempt < retries) {
         console.log(`Request failed (attempt ${attempt + 1}/${retries + 1}), waking backend...`);
-        await wakeUpBackend(2); // quick 2-try wake
+        // Aggressive wake: 6 attempts (~30s) to handle full cold start
+        await wakeUpBackend(6);
         await new Promise((r) => setTimeout(r, delayMs));
         continue;
       }
@@ -116,6 +125,7 @@ export function stopKeepAlive() {
 
 /**
  * Start aggressive keep-alive for critical operations (checkout, payment).
+ * During payment flow, pings even when page isn't visible (Razorpay modal may obscure focus).
  * Returns a function to stop the aggressive pinging.
  */
 export function startCriticalKeepAlive(): () => void {
@@ -124,11 +134,9 @@ export function startCriticalKeepAlive(): () => void {
   // Immediate ping
   pingBackend();
   
-  // Aggressive pinging every 20 seconds
+  // Aggressive pinging every 10 seconds — ignore page visibility during payment
   criticalInterval = setInterval(() => {
-    if (isPageVisible) {
-      pingBackend();
-    }
+    pingBackend();
   }, CRITICAL_PING_INTERVAL);
   
   // Return cleanup function

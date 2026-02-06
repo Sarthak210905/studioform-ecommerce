@@ -4,7 +4,7 @@ import { useAuthStore } from '@/store/authStore';
 
 // Retry configuration
 const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000; // 1 second
+const RETRY_DELAY = 2000; // 2 seconds (backend cold start can take 10-30s)
 const RETRY_STATUS_CODES = [408, 429, 500, 502, 503, 504];
 
 // Sleep utility
@@ -16,7 +16,7 @@ export const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000, // 30 seconds
+  timeout: 60000, // 60 seconds (allows for free-tier cold starts)
 });
 
 // Request interceptor to add auth token
@@ -48,12 +48,17 @@ api.interceptors.response.use(
     // Get current retry count
     const retryCount = parseInt(config.headers?.['x-retry-count'] as string || '0');
     
-    // Check if we should retry
+    // Check if we should retry - include timeout and network errors
+    const isNetworkOrTimeout = 
+      error.code === 'ECONNABORTED' || 
+      error.message?.includes('timeout') || 
+      error.message === 'Network Error';
+    const isRetryableStatus = 
+      error.response && RETRY_STATUS_CODES.includes(error.response.status);
     const shouldRetry = 
       config && 
       retryCount < MAX_RETRIES &&
-      error.response &&
-      RETRY_STATUS_CODES.includes(error.response.status);
+      (isRetryableStatus || isNetworkOrTimeout);
     
     if (shouldRetry) {
       // Increment retry count
@@ -62,7 +67,7 @@ api.interceptors.response.use(
       // Calculate delay with exponential backoff
       const delay = RETRY_DELAY * Math.pow(2, retryCount);
       
-      console.log(`Retrying request (${retryCount + 1}/${MAX_RETRIES}) after ${delay}ms...`);
+      console.log(`Request failed (attempt ${retryCount + 1}/${MAX_RETRIES}), retrying after ${delay}ms...${isNetworkOrTimeout ? ' (waking backend)' : ''}`);
       
       // Wait before retrying
       await sleep(delay);
@@ -106,10 +111,9 @@ api.interceptors.response.use(
       console.log('Authentication required for this feature');
     }
     
-    // Handle network errors
+    // Handle network errors (only if retries exhausted)
     if (error.code === 'ECONNABORTED' || error.message === 'Network Error') {
-      console.error('Network error:', error.message);
-      // You could show a toast here for network errors
+      console.error('Network error after retries:', error.message);
     }
     
     return Promise.reject(error);
