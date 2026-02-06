@@ -7,7 +7,7 @@ from app.models.cart import CartItem
 from app.models.wishlist import WishlistItem
 from app.models.review import Review
 from app.models.notification import Notification
-from app.models.recently_viewed import RecentlyViewed
+from app.models.tracking import RecentlyViewed
 from app.models.return_request import ReturnRequest
 
 async def init_indexes():
