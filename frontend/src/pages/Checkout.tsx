@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
 import { api } from '@/lib/axios';
+import { wakeUpBackend } from '@/utils/keepAlive';
 import { Loader2, CreditCard, Truck, MapPin, Package, ShieldCheck } from 'lucide-react';
 import RazorpayPayment from '@/components/common/RazorpayPayment';
 import shippingService from '@/services/shipping.service';
@@ -260,6 +261,9 @@ export default function Checkout() {
 
     setLoading(true);
     try {
+      // Pre-warm the backend to prevent timeout on Render free tier
+      await wakeUpBackend(3);
+      
       // Sync cart to backend before placing order
       await syncCartToBackend();
 

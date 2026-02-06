@@ -5,6 +5,7 @@ import Layout from '@/components/layout/Layout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { initGA, trackPageView } from '@/utils/analytics';
+import { startKeepAlive, stopKeepAlive } from '@/utils/keepAlive';
 import { Loader2 } from 'lucide-react';
 
 // Eager load critical pages
@@ -80,6 +81,12 @@ function App() {
   useEffect(() => {
     // Initialize Google Analytics on app load
     initGA();
+    // Start keep-alive pings to prevent Render free-tier spin-down
+    startKeepAlive();
+    
+    return () => {
+      stopKeepAlive();
+    };
   }, []);
 
   return (

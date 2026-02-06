@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { api } from '@/lib/axios';
-import { CheckCircle, Package, Home, Loader2 } from 'lucide-react';
+import { resilientApiCall } from '@/utils/keepAlive';
+import { CheckCircle, Package, Home, Loader2, AlertCircle } from 'lucide-react';
 
 interface OrderItem {
   product_id: string;
@@ -52,19 +53,33 @@ export default function OrderSuccess() {
   const navigate = useNavigate();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
+  const [retrying, setRetrying] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadOrder();
   }, [id]);
 
-  const loadOrder = async () => {
+  const loadOrder = async (retry = false) => {
+    if (retry) setRetrying(true);
+    setError(null);
+    
     try {
-      const response = await api.get(`/orders/${id}`);
+      const response = await resilientApiCall(
+        () => api.get(`/orders/${id}`, { timeout: 60000 }),
+        3,
+        5000
+      );
       setOrder(response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load order:', error);
+      setError(
+        error.response?.data?.detail ||
+          'Failed to load order. The server may be waking up. Please retry.'
+      );
     } finally {
       setLoading(false);
+      setRetrying(false);
     }
   };
 
@@ -87,10 +102,31 @@ export default function OrderSuccess() {
     }
   }; */
 
-  if (loading) {
+  if (loading || retrying) {
     return (
-      <div className="container mx-auto px-4 py-16 flex items-center justify-center min-h-[60vh]">
+      <div className="container mx-auto px-4 py-16 flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">
+          {retrying ? 'Retrying... Server may be waking up.' : 'Loading your order details...'}
+        </p>
+      </div>
+    );
+  }
+
+  if (!order && error) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center max-w-md">
+        <AlertCircle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+        <h2 className="text-2xl font-bold mb-2">Unable to Load Order</h2>
+        <p className="text-muted-foreground mb-6">{error}</p>
+        <div className="flex gap-3 justify-center">
+          <Button onClick={() => loadOrder(true)} disabled={retrying}>
+            {retrying ? 'Retrying...' : 'Retry'}
+          </Button>
+          <Button variant="outline" onClick={() => navigate('/orders')}>
+            View All Orders
+          </Button>
+        </div>
       </div>
     );
   }

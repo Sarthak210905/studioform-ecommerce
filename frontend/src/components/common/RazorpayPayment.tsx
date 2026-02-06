@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/axios';
+import { resilientApiCall } from '@/utils/keepAlive';
 
 interface RazorpayPaymentProps {
   orderId: string;
@@ -86,13 +87,19 @@ export default function RazorpayPayment({
         order_id: razorpay_order_id,
         handler: async (response: any) => {
           try {
-            // Verify payment on backend
-            const verifyResponse = await api.post('/payment/verify-payment', {
-              order_id: orderId,
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-            });
+            // Verify payment on backend with extended timeout and retries
+            const verifyResponse = await resilientApiCall(() =>
+              api.post(
+                '/payment/verify-payment',
+                {
+                  order_id: orderId,
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                },
+                { timeout: 60000 } // 60s timeout for payment verification
+              )
+            );
 
             if (verifyResponse.data.success) {
               // Payment verified successfully - call success handler
