@@ -11,7 +11,7 @@ from app.models.review import Review
 from app.models.coupon import Coupon
 from app.models.address import Address
 from app.models.notification import Notification
-from app.models.recently_viewed import RecentlyViewed
+from app.models.tracking import RecentlyViewed, PriceAlert
 from app.models.return_request import ReturnRequest
 from app.models.shipping_zone import ShippingZone
 from app.models.banner import HeroBanner
@@ -42,6 +42,7 @@ async def init_db():
             Address,
             Notification,
             RecentlyViewed,
+            PriceAlert,
             ReturnRequest,
             ShippingZone,
             HeroBanner,

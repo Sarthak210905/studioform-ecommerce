@@ -180,6 +180,7 @@ async def root(request: Request):
 
 # Health check endpoint
 @app.get("/health", tags=["Health"])
+@app.head("/health", tags=["Health"])
 async def health_check():
     """Health check endpoint"""
     return {
