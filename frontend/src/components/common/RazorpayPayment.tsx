@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/axios';
-import { resilientApiCall } from '@/utils/keepAlive';
+import { resilientApiCall, pingBackend } from '@/utils/keepAlive';
 
 interface RazorpayPaymentProps {
   orderId: string;
@@ -32,6 +32,14 @@ export default function RazorpayPayment({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Keep backend awake during payment flow - ping every 30 seconds
+    const keepAliveInterval = setInterval(() => {
+      pingBackend();
+    }, 30000); // 30 seconds
+
+    // Initial ping immediately
+    pingBackend();
+
     // Load Razorpay script
     const script = document.createElement('script');
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
@@ -53,6 +61,10 @@ export default function RazorpayPayment({
     document.body.appendChild(script);
 
     return () => {
+      // Clean up keep-alive interval
+      clearInterval(keepAliveInterval);
+      
+      // Clean up script
       if (document.body.contains(script)) {
         document.body.removeChild(script);
       }
