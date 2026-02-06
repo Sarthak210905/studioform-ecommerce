@@ -120,13 +120,10 @@ export default function Checkout() {
         const defaultAddress = response.data.find((addr: Address) => addr.is_default);
         if (defaultAddress) {
           setSelectedAddressId(defaultAddress.id);
-          // Calculate shipping for default address
-          await calculateShipping(defaultAddress.pincode, defaultAddress.state);
+          // Shipping will be calculated by the useEffect when selectedAddressId changes
         } else {
           // No default address, select the first one
           setSelectedAddressId(response.data[0].id);
-          // Calculate shipping for first address
-          await calculateShipping(response.data[0].pincode, response.data[0].state);
         }
       }
     } catch (error) {
