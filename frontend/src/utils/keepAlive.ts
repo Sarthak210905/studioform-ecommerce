@@ -19,12 +19,12 @@ if (typeof document !== 'undefined') {
  */
 export async function pingBackend(): Promise<boolean> {
   try {
-    // Use HEAD request for minimal bandwidth
-    await fetch(`${BACKEND_URL}/health`, {
-      method: 'HEAD',
+    // Use GET request for better compatibility
+    const response = await fetch(`${BACKEND_URL}/health`, {
+      method: 'GET',
       signal: AbortSignal.timeout(10000),
     });
-    return true;
+    return response.ok;
   } catch {
     return false;
   }

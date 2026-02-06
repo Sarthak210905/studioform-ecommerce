@@ -79,10 +79,19 @@ async def create_payment_order(
         )
     
     if not result["success"]:
-        print(f"Razorpay order creation failed: {result.get('error')}")
+        error_msg = result.get('error', 'Unknown error')
+        print(f"Razorpay order creation failed: {error_msg}")
+        
+        # Check if it's a configuration issue
+        if "not configured" in error_msg.lower():
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Payment gateway is currently unavailable. Please try again later or contact support."
+            )
+        
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create payment order: {result.get('error')}"
+            detail=f"Failed to create payment order: {error_msg}"
         )
     
     # Update order with Razorpay order ID
