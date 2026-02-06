@@ -315,7 +315,7 @@ function ImageGrid({ items, columns = 'md:grid-cols-4', loading }: { items: Imag
                 <div className="absolute inset-0 flex items-center">
                   <div className="p-6 md:p-10 max-w-lg space-y-3 text-white">
                     {/* <Badge variant="secondary" className="bg-white/90 text-black">New Drop</Badge> */}
-                    <h2 className="text-xl font-bold">{pivotBanner.title}</h2>
+                    <h2 className="text-xl sm:text-3xl font-bold">{pivotBanner.title}</h2>
                     <p className="text-sm text-white/80">{pivotBanner.description}</p>
                     {pivotBanner.cta_link && pivotBanner.cta_text ? (
                       <Button variant="secondary" asChild>
@@ -344,7 +344,7 @@ function ImageGrid({ items, columns = 'md:grid-cols-4', loading }: { items: Imag
             <div className="absolute inset-0 flex items-center">
               <div className="p-6 md:p-10 max-w-lg space-y-3 text-white">
                 {/* <Badge variant="secondary" className="bg-white/90 text-black">New Drop</Badge> */}
-                <h2 className="text-xl font-bold">Pivot Collection</h2>
+                <h2 className="text-xl sm:text-3xl font-bold">Pivot Collection</h2>
                 <p className="text-sm text-white/80">Balanced carry built for daily moves.</p>
                 <Button variant="secondary" asChild>
                   <Link to="/products">Shop collection</Link>
@@ -397,7 +397,7 @@ function ImageGrid({ items, columns = 'md:grid-cols-4', loading }: { items: Imag
                 <div className="absolute inset-0 flex items-center">
                   <div className="p-6 md:p-10 max-w-lg space-y-3 text-white">
                     {/* <Badge variant="secondary" className="bg-white/90 text-black">Free duffle bag</Badge> */}
-                    <h2 className="text-xl font-bold">{giftingBanner.title}</h2>
+                    <h2 className="text-xl sm:text-3xl font-bold">{giftingBanner.title}</h2>
                     <p className="text-sm text-white/80">{giftingBanner.description}</p>
                     {giftingBanner.cta_link && giftingBanner.cta_text ? (
                       <Button variant="secondary" asChild>
@@ -426,7 +426,7 @@ function ImageGrid({ items, columns = 'md:grid-cols-4', loading }: { items: Imag
             <div className="absolute inset-0 flex items-center">
               <div className="p-6 md:p-10 max-w-lg space-y-3 text-white">
                 <Badge variant="secondary" className="bg-white/90 text-black">Free duffle bag</Badge>
-                <h2 className="text-xl font-bold">Adapters for every move</h2>
+                <h2 className="text-xl sm:text-3xl font-bold">Adapters for every move</h2>
                 <p className="text-sm text-white/80">Charge, connect, and gift-ready packs.</p>
                 <Button variant="secondary" asChild>
                   <Link to="/products">Shop gifting</Link>
@@ -444,7 +444,7 @@ function ImageGrid({ items, columns = 'md:grid-cols-4', loading }: { items: Imag
       </section>
 
       {/* Press row */}
-      <section className="container px-4 md:px-8 pb-12">
+      {/* <section className="container px-4 md:px-8 pb-12">
         <div className="rounded-xl border bg-card px-6 py-5">
           <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-medium text-muted-foreground">
             <span className="text-sm font-semibold text-foreground">Featured in</span>
@@ -455,13 +455,13 @@ function ImageGrid({ items, columns = 'md:grid-cols-4', loading }: { items: Imag
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Customer Testimonials */}
       <Testimonials />
 
       {/* Reviews snippet */}
-      <section className="container px-4 md:px-8 pb-16">
+      {/* <section className="container px-4 md:px-8 pb-16">
         <div className="rounded-xl border bg-card px-6 py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div className="space-y-1">
             <h3 className="text-lg font-semibold">Honest reviews. Nothing else.</h3>
@@ -471,7 +471,7 @@ function ImageGrid({ items, columns = 'md:grid-cols-4', loading }: { items: Imag
             <Link to="/products">Shop now</Link>
           </Button>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 }
