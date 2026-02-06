@@ -21,10 +21,10 @@ async def track_recently_viewed(
         return {"message": "Product not found"}
     
     # Check if already exists
-    existing = await RecentlyViewed.find_one(
-        RecentlyViewed.user_id == str(current_user.id),
-        RecentlyViewed.product_id == product_id
-    )
+    existing = await RecentlyViewed.find_one({
+        "user_id": str(current_user.id),
+        "product_id": product_id
+    })
     
     if existing:
         # Update timestamp
@@ -42,9 +42,9 @@ async def track_recently_viewed(
         await recently_viewed.save()
     
     # Keep only last 20 viewed products
-    all_viewed = await RecentlyViewed.find(
-        RecentlyViewed.user_id == str(current_user.id)
-    ).sort(-RecentlyViewed.viewed_at).to_list()
+    all_viewed = await RecentlyViewed.find({
+        "user_id": str(current_user.id)
+    }).sort([("viewed_at", -1)]).to_list()
     
     if len(all_viewed) > 20:
         for old_view in all_viewed[20:]:
@@ -58,9 +58,9 @@ async def get_recently_viewed(
     current_user: User = Depends(get_current_active_user)
 ):
     """Get user's recently viewed products"""
-    viewed = await RecentlyViewed.find(
-        RecentlyViewed.user_id == str(current_user.id)
-    ).sort(-RecentlyViewed.viewed_at).limit(limit).to_list()
+    viewed = await RecentlyViewed.find({
+        "user_id": str(current_user.id)
+    }).sort([("viewed_at", -1)]).limit(limit).to_list()
     
     return {
         "items": [
@@ -87,11 +87,11 @@ async def create_price_alert(
         return {"error": "Product not found"}
     
     # Check if alert already exists
-    existing = await PriceAlert.find_one(
-        PriceAlert.user_id == str(current_user.id),
-        PriceAlert.product_id == product_id,
-        PriceAlert.is_triggered == False
-    )
+    existing = await PriceAlert.find_one({
+        "user_id": str(current_user.id),
+        "product_id": product_id,
+        "is_triggered": False
+    })
     
     if existing:
         existing.alert_price = alert_price
@@ -113,10 +113,10 @@ async def get_price_alerts(
     current_user: User = Depends(get_current_active_user)
 ):
     """Get user's active price alerts"""
-    alerts = await PriceAlert.find(
-        PriceAlert.user_id == str(current_user.id),
-        PriceAlert.is_triggered == False
-    ).to_list()
+    alerts = await PriceAlert.find({
+        "user_id": str(current_user.id),
+        "is_triggered": False
+    }).to_list()
     
     result = []
     for alert in alerts:
