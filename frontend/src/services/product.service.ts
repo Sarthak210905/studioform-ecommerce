@@ -7,6 +7,8 @@ export const productService = {
     limit?: number;
     category?: string;
     brand?: string;
+    tag?: string;
+    collection?: string;
     search?: string;
     min_price?: number;
     max_price?: number;
@@ -15,6 +17,11 @@ export const productService = {
   }) {
     const { data } = await api.get('/products/', { params });
     return data;
+  },
+
+  async getCollections(): Promise<string[]> {
+    const { data } = await api.get('/products/collections');
+    return data.collections || [];
   },
 
   async getProduct(id: string): Promise<Product> {
@@ -29,7 +36,7 @@ export const productService = {
 
   async getCategories(): Promise<string[]> {
     const { data } = await api.get('/products/categories');
-    return data;
+    return data.categories || data;
   },
 
   async getBrands(): Promise<string[]> {

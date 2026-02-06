@@ -28,6 +28,7 @@ type ImageTile = {
 };
 
 // State-driven data
+const pressLogos = ['Vogue', 'GQ', 'Hypebeast', 'TechRadar', 'Design Milk'];
 
 function formatPrice(p?: number) {
   if (typeof p !== 'number') return '';
@@ -436,6 +437,26 @@ function ImageGrid({ items, columns = 'md:grid-cols-4', loading }: { items: Imag
         )}
       </section>
 
+      {/* Shop by category */}
+      <section className="container px-4 md:px-8 pb-12 space-y-4">
+        <SectionHeader title="Shop by category" link="/products" />
+        <ImageGrid items={categories} loading={productsLoading} />
+      </section>
+
+      {/* Press row */}
+      <section className="container px-4 md:px-8 pb-12">
+        <div className="rounded-xl border bg-card px-6 py-5">
+          <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-medium text-muted-foreground">
+            <span className="text-sm font-semibold text-foreground">Featured in</span>
+            {pressLogos.map((logo) => (
+              <span key={logo} className="px-2 py-1 rounded-full bg-muted text-foreground/80">
+                {logo}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Customer Testimonials */}
       <Testimonials />
 
@@ -443,8 +464,8 @@ function ImageGrid({ items, columns = 'md:grid-cols-4', loading }: { items: Imag
       <section className="container px-4 md:px-8 pb-16">
         <div className="rounded-xl border bg-card px-6 py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div className="space-y-1">
-            <h3 className="text-lg font-semibold">Love what you see?</h3>
-            <p className="text-sm text-muted-foreground">Browse our curated collection of premium desk accessories.</p>
+            <h3 className="text-lg font-semibold">Honest reviews. Nothing else.</h3>
+            <p className="text-sm text-muted-foreground">4.8/5 average from 12,000+ customers.</p>
           </div>
           <Button asChild>
             <Link to="/products">Shop now</Link>

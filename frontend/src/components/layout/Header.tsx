@@ -16,7 +16,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingCart, Heart, User, LogOut, Package, Settings, Menu, Search } from 'lucide-react';
+import { ShoppingCart, Heart, User, LogOut, Package, Settings, Menu, Search, Sparkles } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useCartStore } from '@/store/cartStore';
 import NotificationBell from '@/components/common/NotificationBell';
@@ -91,6 +91,14 @@ export default function Header() {
                     onClick={closeMobileMenu}
                   >
                     Products
+                  </Link>
+                  <Link 
+                    to="/special-editions" 
+                    className="text-base font-medium py-2 hover:text-primary transition-colors flex items-center gap-1.5"
+                    onClick={closeMobileMenu}
+                  >
+                    
+                    Special Editions
                   </Link>
                   <Link 
                     to="/about" 
@@ -177,6 +185,10 @@ export default function Header() {
           <div className="hidden md:flex items-center gap-6">
             <Link to="/products" className="text-sm font-medium hover:text-primary transition-colors">
               Products
+            </Link>
+            <Link to="/special-editions" className="text-sm font-medium hover:text-primary transition-colors flex items-center gap-1">
+              
+              Special Editions
             </Link>
             <Link to="/about" className="text-sm font-medium hover:text-primary transition-colors">
               About

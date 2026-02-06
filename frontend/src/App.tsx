@@ -12,6 +12,7 @@ import { Loader2 } from 'lucide-react';
 import Home from './pages/Home';
 import Products from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
+import SpecialEditions from './pages/SpecialEditions';
 
 // Lazy load non-critical pages
 const Cart = lazy(() => import('./pages/Cart'));
@@ -112,6 +113,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/products" element={<Products />} />
               <Route path="/products/:id" element={<ProductDetail />} />
+              <Route path="/special-editions" element={<SpecialEditions />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/shipping" element={<Shipping />} />

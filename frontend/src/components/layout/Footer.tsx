@@ -61,6 +61,7 @@ export default function Footer() {
             <h4 className="font-semibold mb-4">Shop</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link to="/products" className="hover:text-foreground transition-colors">All Products</Link></li>
+              <li><Link to="/special-editions" className="hover:text-foreground transition-colors">Special Editions </Link></li>
               <li><Link to="/products?featured=true" className="hover:text-foreground transition-colors">Featured</Link></li>
               <li><Link to="/products?sale=true" className="hover:text-foreground transition-colors">Sale</Link></li>
             </ul>

@@ -27,12 +27,24 @@ async def get_trending_products(limit: int = 100):
     
     return [ProductResponse(**product.dict()) for product in products]
 
+@router.get("/collections")
+async def get_collections():
+    """Get all unique collection tags (Special Edition collections)"""
+    collection = Product.get_motor_collection()
+    # Get distinct tags that represent special edition collections
+    all_tags = await collection.distinct("tags", {"is_active": True, "tags": {"$exists": True, "$ne": []}})
+    # Filter to only collection-style tags (e.g., 'Harry Potter Edition', 'Marvel Edition')
+    collections = sorted([t for t in all_tags if 'Edition' in t or 'Collection' in t or 'Special' in t])
+    return {"collections": collections}
+
 @router.get("/", response_model=dict)
 async def get_products(
     skip: int = 0,
     limit: int = 20,
     category: Optional[str] = None,
     brand: Optional[str] = None,
+    tag: Optional[str] = None,
+    collection: Optional[str] = None,
     search: Optional[str] = None,
     min_price: Optional[float] = None,
     max_price: Optional[float] = None,
@@ -42,7 +54,7 @@ async def get_products(
     """Get all products with filters, search, and caching"""
     
     # Create cache key
-    cache_key = f"products:{skip}:{limit}:{category}:{brand}:{search}:{min_price}:{max_price}:{sort_by}:{sort_order}"
+    cache_key = f"products:{skip}:{limit}:{category}:{brand}:{tag}:{collection}:{search}:{min_price}:{max_price}:{sort_by}:{sort_order}"
     
     # Try to get from cache
     cached_data = cache_get(cache_key)
@@ -57,6 +69,10 @@ async def get_products(
         query = query.find(Product.category == category)
     if brand:
         query = query.find(Product.brand == brand)
+    if tag:
+        query = query.find({"tags": tag})
+    if collection:
+        query = query.find({"tags": collection})
     if search:
         query = query.find({"$text": {"$search": search}})
     if min_price is not None:
