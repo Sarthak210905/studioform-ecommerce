@@ -108,13 +108,13 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link 
+                {/* <Link 
                   to="/special-editions" 
                   className="text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1 group"
                 >
                   <span>Special Editions</span>
                   <ArrowRight className="h-3 w-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                </Link>
+                </Link> */}
               </li>
               <li>
                 <Link 

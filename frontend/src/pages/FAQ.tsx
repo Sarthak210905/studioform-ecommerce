@@ -1,17 +1,22 @@
+import { useState } from 'react';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import Breadcrumb from '@/components/common/Breadcrumb';
-import { MessageCircle } from 'lucide-react';
+import {  Search, HelpCircle, Package, CreditCard, RefreshCcw, Shield, Mail } from 'lucide-react';
 
 export default function FAQ() {
+  const [searchQuery, setSearchQuery] = useState('');
+
   const faqs = [
     {
       category: 'Ordering & Payment',
+      icon: CreditCard,
       questions: [
         {
           q: 'What payment methods do you accept?',
@@ -33,6 +38,7 @@ export default function FAQ() {
     },
     {
       category: 'Shipping & Delivery',
+      icon: Package,
       questions: [
         {
           q: 'What are the shipping charges?',
@@ -54,6 +60,7 @@ export default function FAQ() {
     },
     {
       category: 'Exchange Policy',
+      icon: RefreshCcw,
       questions: [
         {
           q: 'What is your exchange policy?',
@@ -75,6 +82,7 @@ export default function FAQ() {
     },
     {
       category: 'Products & Stock',
+      icon: HelpCircle,
       questions: [
         {
           q: 'How do I know if a product is in stock?',
@@ -96,6 +104,7 @@ export default function FAQ() {
     },
     {
       category: 'Account & Privacy',
+      icon: Shield,
       questions: [
         {
           q: 'Do I need an account to place an order?',
@@ -117,58 +126,124 @@ export default function FAQ() {
     },
   ];
 
+  // Filter FAQs based on search query
+  const filteredFaqs = faqs.map(section => ({
+    ...section,
+    questions: section.questions.filter(
+      faq =>
+        faq.q.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        faq.a.toLowerCase().includes(searchQuery.toLowerCase())
+    ),
+  })).filter(section => section.questions.length > 0);
+
   return (
-    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 max-w-4xl">
-      <Breadcrumb />
+    <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
+      <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 md:py-12 max-w-5xl">
+        <Breadcrumb />
 
-      <div className="mb-6 sm:mb-8">
-        <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-          <MessageCircle className="h-6 w-6 sm:h-8 sm:w-8 text-primary flex-shrink-0" />
-          <h1 className="text-2xl sm:text-3xl font-bold">Frequently Asked Questions</h1>
-        </div>
-        <p className="text-sm sm:text-base text-muted-foreground">
-          Find answers to common questions about ordering, shipping, returns, and more.
-        </p>
-      </div>
-
-      <div className="space-y-4 sm:space-y-5 md:space-y-6">
-        {faqs.map((section, index) => (
-          <Card key={index}>
-            <CardHeader className="pb-3 sm:pb-4">
-              <CardTitle className="text-lg sm:text-xl">{section.category}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Accordion type="single" collapsible className="w-full">
-                {section.questions.map((faq, qIndex) => (
-                  <AccordionItem key={qIndex} value={`item-${index}-${qIndex}`}>
-                    <AccordionTrigger className="text-left text-sm sm:text-base py-3 sm:py-4">
-                      {faq.q}
-                    </AccordionTrigger>
-                    <AccordionContent className="text-xs sm:text-sm text-muted-foreground pb-3 sm:pb-4">
-                      {faq.a}
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <Card className="mt-6 sm:mt-8 bg-muted/50">
-        <CardContent className="p-4 sm:p-5 md:p-6 text-center">
-          <h3 className="font-semibold text-base sm:text-lg mb-1 sm:mb-2">Still have questions?</h3>
-          <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
-            Can't find the answer you're looking for? Contact our customer support team.
+        {/* Header */}
+        <div className="text-center mb-8 sm:mb-12">
+        
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3">
+            How can we help you?
+          </h1>
+          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
+            Find answers to common questions about ordering, shipping, returns, and more
           </p>
-          <a
-            href="/contact"
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 sm:h-11 px-4 sm:px-6 py-2 touch-manipulation"
-          >
-            Contact Support
-          </a>
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* Search Bar */}
+        <div className="max-w-2xl mx-auto mb-8 sm:mb-12">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search for answers..."
+              className="pl-12 h-12 sm:h-14 text-base"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          {searchQuery && (
+            <p className="mt-2 text-sm text-muted-foreground">
+              Found {filteredFaqs.reduce((acc, section) => acc + section.questions.length, 0)} results
+            </p>
+          )}
+        </div>
+
+        {/* FAQ Categories */}
+        {filteredFaqs.length > 0 ? (
+          <div className="space-y-6 sm:space-y-8">
+            {filteredFaqs.map((section, index) => {
+              const Icon = section.icon;
+              return (
+                <div key={index} className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border">
+                  {/* Category Header */}
+                  <div className="border-b px-4 sm:px-6 py-4 sm:py-5">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
+                        <Icon className="h-5 w-5 text-primary" />
+                      </div>
+                      <h2 className="text-lg sm:text-xl font-semibold">{section.category}</h2>
+                    </div>
+                  </div>
+
+                  {/* Questions */}
+                  <div className="p-4 sm:p-6">
+                    <Accordion type="single" collapsible className="w-full">
+                      {section.questions.map((faq, qIndex) => (
+                        <AccordionItem 
+                          key={qIndex} 
+                          value={`item-${index}-${qIndex}`}
+                          className="border-b last:border-0"
+                        >
+                          <AccordionTrigger className="text-left text-sm sm:text-base py-4 hover:no-underline hover:text-primary transition-colors">
+                            <span className="font-medium">{faq.q}</span>
+                          </AccordionTrigger>
+                          <AccordionContent className="text-sm text-muted-foreground pb-4 pt-1 leading-relaxed">
+                            {faq.a}
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
+              <Search className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">No results found</h3>
+            <p className="text-muted-foreground mb-4">
+              Try searching with different keywords or browse all categories
+            </p>
+            <Button variant="outline" onClick={() => setSearchQuery('')}>
+              Clear search
+            </Button>
+          </div>
+        )}
+
+        {/* Contact Support Card */}
+        <div className="mt-8 sm:mt-12 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl border border-primary/20 overflow-hidden">
+          <div className="p-6 sm:p-8 text-center">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-4">
+              <Mail className="h-6 w-6 text-primary" />
+            </div>
+            <h3 className="text-xl sm:text-2xl font-bold mb-2">Still need help?</h3>
+            <p className="text-sm sm:text-base text-muted-foreground mb-6 max-w-md mx-auto">
+              Can't find the answer you're looking for? Our customer support team is here to assist you.
+            </p>
+            <Button size="lg" asChild>
+              <a href="/contact">
+                Contact Support
+              </a>
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

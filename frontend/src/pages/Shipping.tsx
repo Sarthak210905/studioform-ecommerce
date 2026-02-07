@@ -40,7 +40,7 @@ export default function Shipping() {
               <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
             </div>
             <h3 className="font-semibold text-sm sm:text-base mb-0.5 sm:mb-1">Fast Delivery</h3>
-            <p className="text-xs sm:text-sm text-muted-foreground">3-7 business days</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">5-7 business days</p>
           </CardContent>
         </Card>
 
@@ -78,16 +78,10 @@ export default function Shipping() {
                 <Badge variant="outline" className="text-xs flex-shrink-0">Standard</Badge>
                 <span className="text-xs sm:text-sm">Orders below ₹1499</span>
               </div>
-              <span className="font-semibold text-sm sm:text-base flex-shrink-0">₹49</span>
+              <span className="font-semibold text-sm sm:text-base flex-shrink-0">₹150</span>
             </div>
 
-            <div className="flex items-center justify-between p-3 sm:p-4 bg-muted/50 rounded-lg gap-2">
-              <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                <Badge variant="outline" className="text-xs flex-shrink-0">Express</Badge>
-                <span className="text-xs sm:text-sm">Priority delivery (1-3 days)</span>
-              </div>
-              <span className="font-semibold text-sm sm:text-base flex-shrink-0">₹99</span>
-            </div>
+          
           </div>
         </CardContent>
       </Card>

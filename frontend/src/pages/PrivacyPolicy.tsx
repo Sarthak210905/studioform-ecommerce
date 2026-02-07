@@ -1,168 +1,280 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import { useState } from 'react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import SEOHead from '@/components/common/SEOHead';
+import { Shield, ChevronRight, Mail, MapPin } from 'lucide-react';
 
 export default function PrivacyPolicy() {
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+
+  const sections = [
+    { id: 'introduction', title: 'Introduction' },
+    { id: 'information', title: 'Information We Collect' },
+    { id: 'usage', title: 'How We Use Your Information' },
+    { id: 'security', title: 'Data Security' },
+    { id: 'payment', title: 'Payment Security' },
+    { id: 'retention', title: 'Data Retention' },
+    { id: 'rights', title: 'Your Legal Rights' },
+    { id: 'cookies', title: 'Cookies' },
+    { id: 'third-party', title: 'Third-Party Services' },
+    { id: 'children', title: 'Children\'s Privacy' },
+    { id: 'changes', title: 'Changes to This Policy' },
+    { id: 'contact', title: 'Contact Us' },
+  ];
+
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setActiveSection(id);
+    }
+  };
+
   return (
-    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 max-w-4xl">
+    <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
       <SEOHead
         title="Privacy Policy"
         description="Privacy Policy for Premium Desk Accessories - Learn how we collect, use, and protect your personal information"
         keywords="privacy policy, data protection, personal information, GDPR"
       />
 
-      <Card className="max-w-4xl mx-auto">
-        <CardHeader className="pb-3 sm:pb-4">
-          <CardTitle className="text-2xl sm:text-3xl">Privacy Policy</CardTitle>
-          <p className="text-xs sm:text-sm text-muted-foreground">Last updated: January 17, 2026</p>
-        </CardHeader>
-        <CardContent className="prose prose-sm max-w-none space-y-4 sm:space-y-5 md:space-y-6">
-          <section>
-            <h2 className="text-lg sm:text-xl md:text-2xl font-semibold mb-2 sm:mb-3">1. Introduction</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              Welcome to Premium Desk Accessories. We respect your privacy and are committed to protecting your personal data. 
-              This privacy policy will inform you about how we look after your personal data when you visit our website and 
-              tell you about your privacy rights and how the law protects you.
-            </p>
-          </section>
+      <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 md:py-12 max-w-7xl">
+        {/* Header */}
+        <div className="text-center mb-8 sm:mb-12">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+            <Shield className="h-8 w-8 text-primary" />
+          </div>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3">
+            Privacy Policy
+          </h1>
+          <p className="text-base sm:text-lg text-muted-foreground">
+            Last updated: January 17, 2026
+          </p>
+        </div>
 
-          <Separator />
+        <div className="grid lg:grid-cols-[280px_1fr] gap-6 sm:gap-8">
+          {/* Table of Contents - Sidebar */}
+          <aside className="lg:sticky lg:top-6 h-fit">
+            <Card className="p-4 sm:p-6">
+              <h2 className="text-lg font-semibold mb-4">Table of Contents</h2>
+              <nav className="space-y-1">
+                {sections.map((section, index) => (
+                  <button
+                    key={section.id}
+                    onClick={() => scrollToSection(section.id)}
+                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between group ${
+                      activeSection === section.id
+                        ? 'bg-primary text-primary-foreground'
+                        : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <span>{index + 1}. {section.title}</span>
+                    <ChevronRight className={`h-4 w-4 transition-transform ${
+                      activeSection === section.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                    }`} />
+                  </button>
+                ))}
+              </nav>
+            </Card>
+          </aside>
 
-          <section>
-            <h2 className="text-lg sm:text-xl md:text-2xl font-semibold mb-2 sm:mb-3">2. Information We Collect</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground mb-1.5 sm:mb-2">We may collect, use, store and transfer different kinds of personal data about you:</p>
-            <ul className="list-disc pl-4 sm:pl-5 md:pl-6 space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-muted-foreground">
-              <li><strong>Identity Data:</strong> First name, last name, username</li>
-              <li><strong>Contact Data:</strong> Email address, telephone number, billing and delivery addresses</li>
-              <li><strong>Transaction Data:</strong> Details about payments and products purchased</li>
-              <li><strong>Technical Data:</strong> IP address, browser type, device information, operating system</li>
-              <li><strong>Usage Data:</strong> Information about how you use our website, products and services</li>
-              <li><strong>Marketing Data:</strong> Your preferences in receiving marketing communications</li>
-            </ul>
-          </section>
+          {/* Main Content */}
+          <div className="space-y-6">
+            {/* Section 1 */}
+            <section id="introduction" className="bg-white dark:bg-slate-900 rounded-xl p-6 sm:p-8 shadow-sm border">
+              <h2 className="text-xl sm:text-2xl font-semibold mb-4">1. Introduction</h2>
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                Welcome to Studioform. We respect your privacy and are committed to protecting your personal data. 
+                This privacy policy will inform you about how we look after your personal data when you visit our website and 
+                tell you about your privacy rights and how the law protects you.
+              </p>
+            </section>
 
-          <Separator />
+            {/* Section 2 */}
+            <section id="information" className="bg-white dark:bg-slate-900 rounded-xl p-6 sm:p-8 shadow-sm border">
+              <h2 className="text-xl sm:text-2xl font-semibold mb-4">2. Information We Collect</h2>
+              <p className="text-sm sm:text-base text-muted-foreground mb-4 leading-relaxed">
+                We may collect, use, store and transfer different kinds of personal data about you:
+              </p>
+              <ul className="space-y-2 text-sm sm:text-base text-muted-foreground">
+                {[
+                  { label: 'Identity Data', desc: 'First name, last name, username' },
+                  { label: 'Contact Data', desc: 'Email address, telephone number, billing and delivery addresses' },
+                  { label: 'Transaction Data', desc: 'Details about payments and products purchased' },
+                  { label: 'Technical Data', desc: 'IP address, browser type, device information, operating system' },
+                  { label: 'Usage Data', desc: 'Information about how you use our website, products and services' },
+                  { label: 'Marketing Data', desc: 'Your preferences in receiving marketing communications' }
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="text-primary mt-1">•</span>
+                    <span className="flex-1">
+                      <strong className="text-foreground">{item.label}:</strong> {item.desc}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
 
-          <section>
-            <h2 className="text-2xl font-semibold mb-3">3. How We Use Your Information</h2>
-            <p className="text-muted-foreground mb-2">We use your personal data for the following purposes:</p>
-            <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-              <li>To process and deliver your orders</li>
-              <li>To manage payments, fees and charges</li>
-              <li>To send you service-related communications</li>
-              <li>To provide customer support</li>
-              <li>To improve our website, products and services</li>
-              <li>To send you marketing communications (with your consent)</li>
-              <li>To detect and prevent fraud</li>
-            </ul>
-          </section>
+            {/* Section 3 */}
+            <section id="usage" className="bg-white dark:bg-slate-900 rounded-xl p-6 sm:p-8 shadow-sm border">
+              <h2 className="text-xl sm:text-2xl font-semibold mb-4">3. How We Use Your Information</h2>
+              <p className="text-sm sm:text-base text-muted-foreground mb-4 leading-relaxed">
+                We use your personal data for the following purposes:
+              </p>
+              <ul className="space-y-2 text-sm sm:text-base text-muted-foreground">
+                {[
+                  'To process and deliver your orders',
+                  'To manage payments, fees and charges',
+                  'To send you service-related communications',
+                  'To provide customer support',
+                  'To improve our website, products and services',
+                  'To send you marketing communications (with your consent)',
+                  'To detect and prevent fraud'
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="text-primary mt-1">•</span>
+                    <span className="flex-1">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
 
-          <Separator />
+            {/* Section 4 */}
+            <section id="security" className="bg-white dark:bg-slate-900 rounded-xl p-6 sm:p-8 shadow-sm border">
+              <h2 className="text-xl sm:text-2xl font-semibold mb-4">4. Data Security</h2>
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                We have implemented appropriate security measures to prevent your personal data from being accidentally lost, 
+                used or accessed in an unauthorized way. We use SSL encryption for all transactions and store passwords using 
+                industry-standard hashing algorithms.
+              </p>
+            </section>
 
-          <section>
-            <h2 className="text-2xl font-semibold mb-3">4. Data Security</h2>
-            <p className="text-muted-foreground">
-              We have implemented appropriate security measures to prevent your personal data from being accidentally lost, 
-              used or accessed in an unauthorized way. We use SSL encryption for all transactions and store passwords using 
-              industry-standard hashing algorithms.
-            </p>
-          </section>
+            {/* Section 5 */}
+            <section id="payment" className="bg-white dark:bg-slate-900 rounded-xl p-6 sm:p-8 shadow-sm border">
+              <h2 className="text-xl sm:text-2xl font-semibold mb-4">5. Payment Security</h2>
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                All payment transactions are processed through our secure payment gateway provider (Razorpay). We do not store 
+                complete credit card information on our servers. Payment information is encrypted and transmitted directly to 
+                our payment processor.
+              </p>
+            </section>
 
-          <Separator />
+            {/* Section 6 */}
+            <section id="retention" className="bg-white dark:bg-slate-900 rounded-xl p-6 sm:p-8 shadow-sm border">
+              <h2 className="text-xl sm:text-2xl font-semibold mb-4">6. Data Retention</h2>
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                We will only retain your personal data for as long as necessary to fulfill the purposes we collected it for, 
+                including for the purposes of satisfying any legal, accounting, or reporting requirements. Order information 
+                is retained for 7 years for tax and legal purposes.
+              </p>
+            </section>
 
-          <section>
-            <h2 className="text-2xl font-semibold mb-3">5. Payment Security</h2>
-            <p className="text-muted-foreground">
-              All payment transactions are processed through our secure payment gateway provider (Razorpay). We do not store 
-              complete credit card information on our servers. Payment information is encrypted and transmitted directly to 
-              our payment processor.
-            </p>
-          </section>
+            {/* Section 7 */}
+            <section id="rights" className="bg-white dark:bg-slate-900 rounded-xl p-6 sm:p-8 shadow-sm border">
+              <h2 className="text-xl sm:text-2xl font-semibold mb-4">7. Your Legal Rights</h2>
+              <p className="text-sm sm:text-base text-muted-foreground mb-4 leading-relaxed">
+                Under data protection laws, you have rights including:
+              </p>
+              <ul className="space-y-2 text-sm sm:text-base text-muted-foreground">
+                {[
+                  { label: 'Right to access', desc: 'Request copies of your personal data' },
+                  { label: 'Right to rectification', desc: 'Request correction of inaccurate data' },
+                  { label: 'Right to erasure', desc: 'Request deletion of your personal data' },
+                  { label: 'Right to restrict processing', desc: 'Request restriction of processing your data' },
+                  { label: 'Right to data portability', desc: 'Request transfer of your data' },
+                  { label: 'Right to object', desc: 'Object to processing of your personal data' }
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="text-primary mt-1">•</span>
+                    <span className="flex-1">
+                      <strong className="text-foreground">{item.label}:</strong> {item.desc}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
 
-          <Separator />
+            {/* Section 8 */}
+            <section id="cookies" className="bg-white dark:bg-slate-900 rounded-xl p-6 sm:p-8 shadow-sm border">
+              <h2 className="text-xl sm:text-2xl font-semibold mb-4">8. Cookies</h2>
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                We use cookies and similar tracking technologies to track activity on our website and store certain information. 
+                You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However, if you 
+                do not accept cookies, you may not be able to use some portions of our website.
+              </p>
+            </section>
 
-          <section>
-            <h2 className="text-2xl font-semibold mb-3">6. Data Retention</h2>
-            <p className="text-muted-foreground">
-              We will only retain your personal data for as long as necessary to fulfill the purposes we collected it for, 
-              including for the purposes of satisfying any legal, accounting, or reporting requirements. Order information 
-              is retained for 7 years for tax and legal purposes.
-            </p>
-          </section>
+            {/* Section 9 */}
+            <section id="third-party" className="bg-white dark:bg-slate-900 rounded-xl p-6 sm:p-8 shadow-sm border">
+              <h2 className="text-xl sm:text-2xl font-semibold mb-4">9. Third-Party Services</h2>
+              <p className="text-sm sm:text-base text-muted-foreground mb-4 leading-relaxed">
+                We may share your data with:
+              </p>
+              <ul className="space-y-2 text-sm sm:text-base text-muted-foreground">
+                {[
+                  'Payment processors (Razorpay) for transaction processing',
+                  'Shipping partners for order delivery',
+                  'Email service providers for communications',
+                  'Analytics providers to improve our services'
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="text-primary mt-1">•</span>
+                    <span className="flex-1">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
 
-          <Separator />
+            {/* Section 10 */}
+            <section id="children" className="bg-white dark:bg-slate-900 rounded-xl p-6 sm:p-8 shadow-sm border">
+              <h2 className="text-xl sm:text-2xl font-semibold mb-4">10. Children's Privacy</h2>
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                Our services are not directed to children under 18. We do not knowingly collect personal information from 
+                children under 18. If you become aware that a child has provided us with personal data, please contact us.
+              </p>
+            </section>
 
-          <section>
-            <h2 className="text-2xl font-semibold mb-3">7. Your Legal Rights</h2>
-            <p className="text-muted-foreground mb-2">Under data protection laws, you have rights including:</p>
-            <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-              <li><strong>Right to access:</strong> Request copies of your personal data</li>
-              <li><strong>Right to rectification:</strong> Request correction of inaccurate data</li>
-              <li><strong>Right to erasure:</strong> Request deletion of your personal data</li>
-              <li><strong>Right to restrict processing:</strong> Request restriction of processing your data</li>
-              <li><strong>Right to data portability:</strong> Request transfer of your data</li>
-              <li><strong>Right to object:</strong> Object to processing of your personal data</li>
-            </ul>
-          </section>
+            {/* Section 11 */}
+            <section id="changes" className="bg-white dark:bg-slate-900 rounded-xl p-6 sm:p-8 shadow-sm border">
+              <h2 className="text-xl sm:text-2xl font-semibold mb-4">11. Changes to This Policy</h2>
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new 
+                Privacy Policy on this page and updating the "Last updated" date.
+              </p>
+            </section>
 
-          <Separator />
+            {/* Section 12 - Contact */}
+            <section id="contact" className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-6 sm:p-8 border border-primary/20">
+              <h2 className="text-xl sm:text-2xl font-semibold mb-4">12. Contact Us</h2>
+              <p className="text-sm sm:text-base text-muted-foreground mb-4 leading-relaxed">
+                If you have any questions about this Privacy Policy or our data practices, please contact us at:
+              </p>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 text-sm sm:text-base">
+                  <Mail className="h-5 w-5 text-primary" />
+                  <a href="mailto:contact.studioform@gmail.com" className="text-primary hover:underline">
+                    contact.studioform@gmail.com
+                  </a>
+                </div>
+                <div className="flex items-center gap-3 text-sm sm:text-base text-muted-foreground">
+                  <MapPin className="h-5 w-5 text-primary" />
+                  <span>Indore, Madhya Pradesh, India</span>
+                </div>
+              </div>
+            </section>
 
-          <section>
-            <h2 className="text-2xl font-semibold mb-3">8. Cookies</h2>
-            <p className="text-muted-foreground">
-              We use cookies and similar tracking technologies to track activity on our website and store certain information. 
-              You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However, if you 
-              do not accept cookies, you may not be able to use some portions of our website.
-            </p>
-          </section>
-
-          <Separator />
-
-          <section>
-            <h2 className="text-2xl font-semibold mb-3">9. Third-Party Services</h2>
-            <p className="text-muted-foreground mb-2">We may share your data with:</p>
-            <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-              <li>Payment processors (Razorpay) for transaction processing</li>
-              <li>Shipping partners for order delivery</li>
-              <li>Email service providers for communications</li>
-              <li>Analytics providers to improve our services</li>
-            </ul>
-          </section>
-
-          <Separator />
-
-          <section>
-            <h2 className="text-2xl font-semibold mb-3">10. Children's Privacy</h2>
-            <p className="text-muted-foreground">
-              Our services are not directed to children under 18. We do not knowingly collect personal information from 
-              children under 18. If you become aware that a child has provided us with personal data, please contact us.
-            </p>
-          </section>
-
-          <Separator />
-
-          <section>
-            <h2 className="text-2xl font-semibold mb-3">11. Changes to This Policy</h2>
-            <p className="text-muted-foreground">
-              We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new 
-              Privacy Policy on this page and updating the "Last updated" date.
-            </p>
-          </section>
-
-          <Separator />
-
-          <section>
-            <h2 className="text-2xl font-semibold mb-3">12. Contact Us</h2>
-            <p className="text-muted-foreground">
-              If you have any questions about this Privacy Policy or our data practices, please contact us at:
-            </p>
-            <div className="mt-3 text-muted-foreground">
-              <p><strong>Email:</strong> contact.studioform@gmail.com</p>
-              <p><strong>Address:</strong> Indore, Madhya Pradesh, India</p>
+            {/* Back to Top Button */}
+            <div className="flex justify-center pt-4">
+              <Button
+                variant="outline"
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              >
+                Back to Top
+              </Button>
             </div>
-          </section>
-        </CardContent>
-      </Card>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
