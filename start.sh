@@ -10,9 +10,9 @@ cd backend
 
 # Install Python dependencies
 echo "📦 Installing Python dependencies..."
-python -m ensurepip --upgrade
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+python -m venv /app/venv
+/app/venv/bin/pip install --upgrade pip
+/app/venv/bin/pip install -r requirements.txt
 
 # Navigate to project root
 cd ..
@@ -34,4 +34,4 @@ cp -r frontend/dist/* backend/static/
 # Navigate back to backend and start the server
 cd backend
 echo "✅ Starting FastAPI server..."
-python -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
+/app/venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
