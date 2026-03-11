@@ -558,7 +558,7 @@ export default function Checkout() {
               <div className="space-y-3 sm:space-y-4">
                 <div className="flex items-start space-x-2 sm:space-x-3 border rounded-lg p-3 sm:p-4 bg-primary/5">
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-sm sm:text-base mb-0.5 sm:mb-1">Online Payment (Razorpay)</div>
+                    <div className="font-semibold text-sm sm:text-base mb-0.5 sm:mb-1">Online Payment </div>
                     <p className="text-xs sm:text-sm text-muted-foreground">Secure payment using UPI, Cards, Net Banking, Wallets</p>
                     <div className="mt-1.5 sm:mt-2 flex items-center gap-1.5 sm:gap-2 flex-wrap">
                       <Badge variant="secondary" className="text-[10px] sm:text-xs">100% Secure</Badge>
